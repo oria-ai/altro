@@ -22,7 +22,8 @@ npx playwright install chromium
 ## 1. Log in once and save the session
 
 ```sh
-# Defaults to the Open University; override for any institution:
+# Defaults to the Open University of Israel SSO (Sheilta portal).
+# Override for any institution:
 LOGIN_URL=https://login.your-uni.example npm run auth
 ```
 
@@ -34,7 +35,7 @@ terminal and press Enter. The session is written to `.session/state.json`.
 ## 2. Reuse the session to fetch a page
 
 ```sh
-npm run fetch -- "https://learn2.open.ac.uk/<some-course-page>"
+npm run fetch -- "https://sheilta.apps.openu.ac.il/pls/dmyopt2/<a-course-page>"
 ```
 
 If it prints your course content instead of a login page, the saved session
