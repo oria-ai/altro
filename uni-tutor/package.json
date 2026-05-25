@@ -1,0 +1,14 @@
+{
+  "name": "uni-tutor",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Logs into a university site once, saves the session, and reuses it to pull course material for an AI tutor.",
+  "scripts": {
+    "auth": "node src/auth.js",
+    "fetch": "node src/fetch.js"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}

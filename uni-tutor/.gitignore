@@ -1,0 +1,3 @@
+# Live session cookies / auth tokens — NEVER commit these.
+.session/
+node_modules/
