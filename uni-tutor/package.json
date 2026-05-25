@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Logs into a university site once, saves the session, and reuses it to pull course material for an AI tutor.",
   "scripts": {
+    "probe": "node src/probe.js",
     "auth": "node src/auth.js",
     "fetch": "node src/fetch.js"
   },
