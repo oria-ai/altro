@@ -1,5 +1,12 @@
-# Keep research + local verification artifacts out of the deployed site
+# With .vercelignore present, Vercel uses THIS (not .gitignore) to filter the upload.
+# Keep research, generators, raw masters, key files, and local test artifacts out of the deploy.
 research/
+gen/
+img/raw/
 *.mjs
 smoke-*.png
 live-*.png
+v2-*.png
+config.js
+config.local.js
+.skybox-key

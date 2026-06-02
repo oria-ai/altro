@@ -12,3 +12,6 @@ capture.mjs
 verify-live.mjs
 probe.mjs
 live-*.png
+img/raw/
+v2-*.png
+verify-v2.mjs

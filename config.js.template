@@ -1,3 +1,0 @@
-// Generated at build time from the GOOGLE_MAPS_API_KEY env var (Doppler -> Vercel).
-// This template is committed; the generated config.js is gitignored.
-window.GMAPS_KEY = "__GOOGLE_MAPS_API_KEY__";
