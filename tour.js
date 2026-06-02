@@ -55,8 +55,8 @@ const load = () => { try{ const v = parseInt(localStorage.getItem(STORE),10); re
 function initViewer(){
   viewer = new Viewer({
     container: 'viewer',
-    adapter: undefined,           // default equirectangular
-    panorama: PANO('facade'),     // first frame sits behind the intro veil
+    // no initial `panorama` — VirtualTourPlugin owns the first load (startNodeId),
+    // which avoids a double-fetch/abort of the facade pano.
     navbar: false,
     defaultZoomLvl: 0,
     minFov: 38, maxFov: 85,
