@@ -97,8 +97,8 @@ function makeRoom(world){
 
 /* ---- state ---- */
 const CTX = {
-  palazzo: { label:'Il Palazzo', rooms:[], cursor:0, seed:'img/seed-palazzo.webp' },
-  fuori:   { label:'Fuori',      rooms:[], cursor:0, seed:'img/seed-fuori.webp' },
+  palazzo: { label:'Il Palazzo', rooms:[], cursor:0, seed:'img/seed-palazzo.webp', prep:null },
+  fuori:   { label:'Fuori',      rooms:[], cursor:0, seed:'img/seed-fuori.webp', prep:null },
 };
 let ctx = 'palazzo', viewer = null, busy = false, hintShown = false, shownPano = null;
 
@@ -124,7 +124,7 @@ function initViewer(){
   viewer.addEventListener('ready', () => {
     document.documentElement.style.setProperty('--introbg', `url('${CTX.palazzo.seed}')`);
   }, { once: true });
-  viewer.addEventListener('dblclick', () => { if (!busy && !el('topbar').classList.contains('hidden')) conjure(); });
+  viewer.addEventListener('dblclick', () => { if (!busy && !el('topbar').classList.contains('hidden')) walkOn(); });
 }
 async function show(room){
   if (room.panorama && room.panorama !== shownPano){
@@ -178,31 +178,54 @@ async function resolveName(room){
   await sleep(1100);
 }
 
-async function conjure(){
+/* Generate one room's panorama (network only — no UI). Returns the room with .panorama set. */
+function genRoom(world, room){
+  const style = STYLE_ID[root.getAttribute('data-style')] || 122;
+  return fetch('/api/conjure', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ world, style, archetype: room.arch.kind || room.arch.en, material: room.mat.en }),
+  }).then(r => { if (!r.ok) throw new Error('conjure ' + r.status); return r.json(); })
+    .then(({ id }) => pollStatus(id))
+    .then(url => { room.panorama = '/api/pano?u=' + encodeURIComponent(url); return room; });
+}
+
+/* Always keep the NEXT room for a world pre-building in the background, so walking on is instant. */
+function startPrep(world){
+  const C = CTX[world];
+  if (C.prep) return;                          // one already in flight or ready
+  const room = makeRoom(world);
+  C.prep = { room, ready: false, promise: null };
+  C.prep.promise = genRoom(world, room)
+    .then(() => { if (CTX[world].prep) CTX[world].prep.ready = true; })
+    .catch(() => { CTX[world].prep = null; });  // failed → let it retry on next demand
+}
+
+/* Walk on: consume the pre-built room (instant if ready), else show the beat until it lands. */
+async function walkOn(){
   if (busy) return;
   busy = true; hideHint();
-  const room = makeRoom(ctx);
-  startChoreo(room);
+  const C = CTX[ctx];
+  if (!C.prep) startPrep(ctx);
+  const prep = C.prep;
   try {
-    const r = await fetch('/api/conjure', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ world: ctx, style: STYLE_ID[root.getAttribute('data-style')] || 122,
-        archetype: room.arch.kind || room.arch.en, material: room.mat.en }),
-    });
-    if (!r.ok) throw new Error((await r.json().catch(()=>({}))).error || ('HTTP ' + r.status));
-    const { id } = await r.json();
-    const skyurl = await pollStatus(id);
-    room.panorama = '/api/pano?u=' + encodeURIComponent(skyurl);
-    await resolveName(room);
-    const C = CTX[ctx];
-    C.rooms = C.rooms.slice(0, C.cursor + 1); C.rooms.push(room); C.cursor = C.rooms.length - 1;
-    paintChrome();              // commit chrome (counter/name) before the texture loads
-    await show(room);           // load the panorama (safety-timed, never throws)
-    el('conjure').classList.remove('on');
+    if (!prep || !prep.promise) throw new Error('no preparation');
+    if (!prep.ready){                          // not ready yet → designed wait, with its real name
+      startChoreo(prep.room);
+      await prep.promise;
+      await resolveName(prep.room);
+      el('conjure').classList.remove('on');
+    }
+    C.rooms = C.rooms.slice(0, C.cursor + 1); C.rooms.push(prep.room); C.cursor = C.rooms.length - 1;
+    C.prep = null;
+    paintChrome();
+    await show(prep.room);
   } catch (e) {
-    cancelAnimationFrame(choreoRAF); el('conjure').classList.remove('on');
+    cancelAnimationFrame(choreoRAF); el('conjure').classList.remove('on'); C.prep = null;
     notice('<b>Could not conjure the next room.</b> ' + (e.message || ''));
-  } finally { busy = false; }
+  } finally {
+    busy = false;
+    startPrep(ctx);                            // immediately begin building the next one ahead
+  }
 }
 async function pollStatus(id){
   for (let i = 0; i < 80; i++){
@@ -220,15 +243,19 @@ async function pollStatus(id){
 async function back(){ const C = CTX[ctx]; if (busy || C.cursor <= 0) return; C.cursor--; await show(C.rooms[C.cursor]); paintChrome(); }
 async function forward(){
   const C = CTX[ctx]; if (busy) return;
-  if (C.cursor < C.rooms.length - 1){ C.cursor++; await show(C.rooms[C.cursor]); paintChrome(); } else conjure();
+  if (C.cursor < C.rooms.length - 1){ C.cursor++; await show(C.rooms[C.cursor]); paintChrome(); } else walkOn();
 }
 async function switchCtx(next){
   if (busy || next === ctx) return;
   ctx = next; root.setAttribute('data-world', ctx);
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.ctx === ctx));
   await show(CTX[ctx].rooms[CTX[ctx].cursor]); paintChrome();
+  startPrep(ctx);                              // pre-build this world's next room too
 }
 function setStyle(st){
+  // a style change invalidates a not-yet-shown prep so the next room matches the new look
+  CTX.palazzo.prep = CTX.palazzo.prep && CTX.palazzo.prep.ready ? CTX.palazzo.prep : null;
+  CTX.fuori.prep = CTX.fuori.prep && CTX.fuori.prep.ready ? CTX.fuori.prep : null;
   root.setAttribute('data-style', st);
   document.querySelectorAll('.sbtn').forEach(b => b.classList.toggle('active', b.dataset.style === st));
   try { localStorage.setItem('palazzo-style', st); } catch(e){}
@@ -262,12 +289,13 @@ function hideHint(){ el('hint').classList.add('hidden'); }
 function notice(html){ let n = el('notice'); if (!n){ n = document.createElement('div'); n.id = 'notice'; document.body.appendChild(n); } n.innerHTML = html; n.classList.add('show'); setTimeout(() => n.classList.remove('show'), 6000); }
 
 /* ---- boot ---- */
-async function enter(){ el('intro').classList.add('hidden'); showChrome(true); await show(CTX[ctx].rooms[CTX[ctx].cursor]); paintChrome(); }
+async function enter(){ el('intro').classList.add('hidden'); showChrome(true); await show(CTX[ctx].rooms[CTX[ctx].cursor]); paintChrome(); startPrep(ctx); }
 function start(){
   seedWorlds();
   initViewer();
   root.setAttribute('data-world', ctx);
   setStyle((()=>{ try { return localStorage.getItem('palazzo-style'); } catch(e){ return null; } })() || 'maximal');
+  startPrep('palazzo');                        // begin building the first walk-on while the intro is read
   el('enter').addEventListener('click', enter);
   el('home').addEventListener('click', () => { el('intro').classList.remove('hidden'); showChrome(false); });
   el('restart').addEventListener('click', () => { el('closing').classList.add('hidden'); el('intro').classList.remove('hidden'); showChrome(false); });
