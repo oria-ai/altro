@@ -8,3 +8,7 @@ node_modules/
 smoke.mjs
 smoke-*.png
 capture.mjs
+.vercel
+verify-live.mjs
+probe.mjs
+live-*.png
