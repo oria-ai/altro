@@ -5,6 +5,7 @@
    conjured on demand via /api/conjure → /api/status → /api/pano.
    =================================================================== */
 import { Viewer } from '@photo-sphere-viewer/core';
+import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 
 const el = id => document.getElementById(id);
 const root = document.documentElement;
@@ -119,8 +120,28 @@ const CTX = {
   palazzo: { label:'Il Palazzo', rooms:[], cursor:0, sIdx:1, seed:'img/seed-palazzo.webp', queue:[] },
   fuori:   { label:'Fuori',      rooms:[], cursor:0, sIdx:1, seed:'img/seed-fuori.webp', queue:[] },
 };
-let ctx = 'palazzo', viewer = null, busy = false, hintShown = false, shownPano = null;
+let ctx = 'palazzo', viewer = null, markers = null, busy = false, hintShown = false, shownPano = null;
 let pendingExit = null;   // {yaw,pitch} the visitor double-clicked toward → the direction we walk
+let exitYaw = 0;          // heading of the current room's single exit (the ground arrow)
+const EXIT_PITCH = -0.55; // the exit arrow sits on the floor ahead
+const TAU = Math.PI * 2;
+const angDiff = (a, b) => { let d = (a - b) % TAU; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; return d; };
+
+/* Place the single "walk on" exit arrow on the floor at the given heading. */
+function placeExit(yaw){
+  exitYaw = yaw;
+  if (!markers) return;
+  try { markers.clearMarkers(); } catch (e) {}
+  try {
+    markers.addMarker({
+      id: 'exit', position: { yaw, pitch: EXIT_PITCH },
+      html: '<div class="exit-arrow" role="button" aria-label="Walk on"></div>',
+      anchor: 'center center', scale: { zoom: [0.55, 1.5] },
+      tooltip: { content: 'Walk on', position: 'top center' },
+    });
+  } catch (e) {}
+}
+function clearExit(){ if (markers){ try { markers.clearMarkers(); } catch (e) {} } }
 
 function seedWorlds(){
   CTX.palazzo.rooms = [ staticRoom('palazzo', STATIC.palazzo[0]) ]; CTX.palazzo.sIdx = 1;
@@ -137,16 +158,24 @@ function initViewer(){
     navbar: false,
     defaultZoomLvl: 5, minFov: 35, maxFov: 80,
     moveInertia: true, mousewheel: true, loadingTxt: '',
+    plugins: [[MarkersPlugin, {}]],
   });
+  markers = viewer.getPlugin(MarkersPlugin);
   shownPano = CTX.palazzo.seed;
   viewer.addEventListener('ready', () => {
     document.documentElement.style.setProperty('--introbg', `url('${CTX.palazzo.seed}')`);
   }, { once: true });
+  // clicking the exit arrow walks on
+  if (markers) markers.addEventListener('select-marker', () => { if (!busy && !el('topbar').classList.contains('hidden')) walkThroughExit(); });
+  // double-click: in the exit area → walk on; anywhere else → move in (zoom toward the spot)
   viewer.addEventListener('dblclick', (e) => {
     if (busy || el('topbar').classList.contains('hidden')) return;
-    const d = e && e.data;                                   // walk toward the spot the visitor aimed at
-    pendingExit = d ? { yaw: d.yaw, pitch: d.pitch } : null;
-    walkOn();
+    const d = e && e.data; if (!d) return;
+    const inExit = Math.abs(angDiff(d.yaw, exitYaw)) < 0.55 && d.pitch < 0.05;
+    if (inExit){ walkThroughExit(); return; }
+    // move in: glide toward the clicked point and zoom a little, like stepping closer
+    const z = viewer.getZoomLevel ? viewer.getZoomLevel() : 5;
+    try { viewer.animate({ yaw: d.yaw, pitch: Math.max(-0.5, Math.min(0.5, d.pitch)), zoom: Math.min(60, z + 22), speed: '8rpm' }); } catch (err) {}
   });
 }
 async function show(room, exit){
@@ -168,7 +197,10 @@ async function show(room, exit){
       ]);
     } catch (e) { /* texture/transition hiccup — chrome already updated, image will settle */ }
   }
+  placeExit(exit ? exit.yaw : exitYaw);   // (re)place the single "walk on" arrow ahead
 }
+/* Walk through the current room's single exit (arrow click or double-click in the exit area). */
+function walkThroughExit(){ pendingExit = { yaw: exitYaw, pitch: 0 }; walkOn(); }
 
 /* ---- the conjuring beat (designer choreography, driven by the real generation) ---- */
 const PHRASES = {
@@ -363,6 +395,7 @@ function showChrome(on){
   el('caption').classList.toggle('hidden', !on);
   el('stylebar').classList.toggle('hidden', !on);
   el('veil').classList.toggle('on', on);
+  if (!on) clearExit();                          // no exit arrow over the intro / closing screens
   if (on && !hintShown){ el('hint').classList.remove('hidden'); hintShown = true; setTimeout(hideHint, 6000); }
 }
 function hideHint(){ el('hint').classList.add('hidden'); }

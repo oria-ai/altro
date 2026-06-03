@@ -100,6 +100,15 @@ body{
 /* live color grade for the actual 360 — re-tints whatever is on screen each time the style swaps */
 #stage canvas{ filter:saturate(var(--sat)) brightness(var(--bri)) contrast(var(--con));
   transition:filter .9s var(--ease); }
+
+/* the single "walk on" exit arrow on the floor ahead (Photo Sphere Viewer html marker) */
+.exit-arrow{ width:58px; height:58px; cursor:pointer; opacity:.82;
+  background:radial-gradient(circle at 50% 62%, color-mix(in oklab,var(--gold),#fff 35%), var(--gold) 58%, transparent 74%);
+  clip-path:polygon(50% 4%, 100% 100%, 50% 74%, 0 100%);     /* upward chevron = forward */
+  filter:drop-shadow(0 0 12px color-mix(in oklab,var(--gold),#fff 10%));
+  animation:exitpulse 1.9s var(--ease) infinite; transition:opacity .3s; }
+.exit-arrow:hover{ opacity:1; }
+@keyframes exitpulse{ 0%,100%{ transform:translateY(0) scale(1); opacity:.62; } 50%{ transform:translateY(-7px) scale(1.07); opacity:1; } }
 .scene.live{opacity:1;}
 .scene.depart{opacity:0; transform:scale(1.14); transition:opacity .7s var(--ease), transform .9s var(--ease);}
 .scene.arrive{animation:arrive 1.1s var(--ease) both;}
