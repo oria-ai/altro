@@ -178,7 +178,22 @@ async function resolveName(room){
   await sleep(1100);
 }
 
-/* Generate one room's panorama (network only — no UI). Returns the room with .panorama set. */
+/* Download + decode a panorama into the browser cache so setPanorama is instant later.
+   Resolves only once the image is actually in hand (crossOrigin matches PSV's texture loader
+   so the cache key is identical → guaranteed hit). */
+function preloadPano(url){
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.decoding = 'async';
+    img.onload = () => { try { img.decode && img.decode().catch(()=>{}); } catch(e){} resolve(url); }; // download done = cached; decode best-effort
+    img.onerror = () => resolve(url);   // proceed even if preload fails; setPanorama will retry
+    img.src = url;
+    preloadPano._keep = (preloadPano._keep || []); preloadPano._keep.push(img); // hold ref so it isn't GC'd
+  });
+}
+
+/* Generate one room AND preload its 360 image. Returns the room with .panorama set & cached. */
 function genRoom(world, room){
   const style = STYLE_ID[root.getAttribute('data-style')] || 122;
   return fetch('/api/conjure', {
@@ -186,7 +201,8 @@ function genRoom(world, room){
     body: JSON.stringify({ world, style, archetype: room.arch.kind || room.arch.en, material: room.mat.en }),
   }).then(r => { if (!r.ok) throw new Error('conjure ' + r.status); return r.json(); })
     .then(({ id }) => pollStatus(id))
-    .then(url => { room.panorama = '/api/pano?u=' + encodeURIComponent(url); return room; });
+    .then(url => preloadPano('/api/pano?u=' + encodeURIComponent(url)))
+    .then(panoUrl => { room.panorama = panoUrl; return room; });   // ready only after the image is downloaded+decoded
 }
 
 /* Always keep the NEXT room for a world pre-building in the background, so walking on is instant. */
