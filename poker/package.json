@@ -1,0 +1,14 @@
+{
+  "name": "royal-poker",
+  "version": "1.0.0",
+  "description": "Royal Poker — offline Texas Hold'em (play money)",
+  "type": "module",
+  "scripts": {
+    "test": "node src/engine/evaluator.test.mjs && node src/engine/sim.test.mjs",
+    "serve": "python3 -m http.server 8799",
+    "smoke": "node tools/smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.60.0"
+  }
+}
