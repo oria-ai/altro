@@ -1,0 +1,27 @@
+# Generated at build from Doppler/Vercel env — never commit the key
+config.js
+config.local.js
+node_modules/
+.vercel/
+.DS_Store
+# local dev / verification artifacts — not part of the site
+smoke.mjs
+smoke-*.png
+capture.mjs
+.vercel
+verify-live.mjs
+probe.mjs
+live-*.png
+img/raw/
+v2-*.png
+verify-v2.mjs
+v4-*.png
+verify-v4.mjs
+
+# static-opening verify (local only)
+verify-static.mjs
+static-*.png
+
+# local env (holds SKYBOX_KEY) — never commit
+.env
+.env.*

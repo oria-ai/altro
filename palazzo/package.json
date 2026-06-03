@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "palazzo-tour",
+  "description": "Palazzo Aventino — generative 360 tour",
+  "dependencies": {
+    "sharp": "^0.34.5"
+  }
+}

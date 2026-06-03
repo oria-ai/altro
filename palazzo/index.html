@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en" data-world="palazzo" data-style="maximal">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Palazzo Aventino — A Private Tour</title>
+<meta name="description" content="A generative 360° tour of an endless, opulent palazzo on the Aventine Hill, Rome." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.11.5/index.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin@5.11.5/index.min.css" />
+<link rel="stylesheet" href="palazzo.css" />
+</head>
+<body>
+  <!-- immersive environment — Photo Sphere Viewer mounts its canvas here -->
+  <div id="stage"></div>
+  <div class="veil" id="veil"></div>
+
+  <!-- top bar: wordmark · world tabs · counter -->
+  <header id="topbar" class="hidden">
+    <button class="wordmark" id="home">
+      <div class="wm-name">Palazzo <em>Aventino</em></div>
+      <div class="wm-sub">Roma · Aventino</div>
+    </button>
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-ctx="palazzo">Palazzo</button>
+      <button class="tab" data-ctx="fuori">Fuori</button>
+    </div>
+    <div class="topright">
+      <div class="counter" id="counter">Room I</div>
+      <button class="cap-btn ghost" id="endTour" style="padding:10px 16px">Enquire</button>
+    </div>
+  </header>
+
+  <!-- caption -->
+  <aside id="caption" class="hidden">
+    <div class="cap-eyebrow" id="capEyebrow">Il Palazzo</div>
+    <h2 class="cap-title" id="capTitle">L’Atrio</h2>
+    <div class="cap-sub" id="capSub">The Atrium</div>
+    <p class="cap-desc" id="capDesc"></p>
+    <div class="cap-mat" id="capMat"></div>
+    <div class="cap-actions" id="capActions"></div>
+  </aside>
+
+  <!-- style switch -->
+  <div id="stylebar" class="hidden" role="tablist" aria-label="House style">
+    <button class="sbtn" data-style="photoreal">Photoreal</button>
+    <button class="sbtn active" data-style="maximal">Maximalism</button>
+    <button class="sbtn" data-style="cinematic">Cinematic</button>
+  </div>
+
+  <div id="hint" class="hidden">Drag to look · double-click to walk on ⤢</div>
+
+  <!-- intro -->
+  <section id="intro" class="layer">
+    <div class="introScene" id="introScene"></div>
+    <div class="eyebrow">A Private Residence</div>
+    <h1 class="title">Palazzo<br><em>Aventino</em></h1>
+    <div class="rule"></div>
+    <div class="loc">Aventine Hill · Roma</div>
+    <div class="stats">
+      <div class="stat"><b>1,240</b><span>Square metres</span></div>
+      <div class="stat"><b><em>Senza fine</em></b><span>Principal rooms</span></div>
+      <div class="stat"><b>XVII</b><span>Century</span></div>
+      <div class="stat"><b>Aventino</b><span>Rome</span></div>
+    </div>
+    <button class="btn" id="enter">Step Inside</button>
+  </section>
+
+  <!-- conjuring beat -->
+  <section id="conjure">
+    <svg class="cj-arc" viewBox="0 0 84 84">
+      <circle class="track" cx="42" cy="42" r="38"></circle>
+      <circle class="prog" id="cjProg" cx="42" cy="42" r="38"></circle>
+    </svg>
+    <div class="cj-phrase" id="cjPhrase">Conjuring the next hall…</div>
+    <div class="cj-name" id="cjName"></div>
+    <div class="cj-sub" id="cjSub">Palazzo Aventino</div>
+  </section>
+
+  <!-- closing -->
+  <section id="closing" class="layer hidden">
+    <div class="ct">A Private <em>Viewing</em></div>
+    <div class="cs">Some residences are not listed. They are introduced.</div>
+    <div class="contact">By appointment — <a href="mailto:viewings@nadaa.estate">viewings@nadaa.estate</a></div>
+    <div class="brand">NADAA — Private Estates</div>
+    <button class="btn" id="restart" style="margin-top:clamp(30px,6vh,56px)">Begin Again</button>
+  </section>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "@photo-sphere-viewer/core": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.11.5/index.module.js",
+      "@photo-sphere-viewer/markers-plugin": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin@5.11.5/index.module.js"
+    }
+  }
+  </script>
+  <script type="module" src="tour.js"></script>
+</body>
+</html>
