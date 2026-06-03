@@ -120,6 +120,7 @@ const CTX = {
   fuori:   { label:'Fuori',      rooms:[], cursor:0, sIdx:1, seed:'img/seed-fuori.webp', queue:[] },
 };
 let ctx = 'palazzo', viewer = null, busy = false, hintShown = false, shownPano = null;
+let pendingExit = null;   // {yaw,pitch} the visitor double-clicked toward → the direction we walk
 
 function seedWorlds(){
   CTX.palazzo.rooms = [ staticRoom('palazzo', STATIC.palazzo[0]) ]; CTX.palazzo.sIdx = 1;
@@ -141,15 +142,28 @@ function initViewer(){
   viewer.addEventListener('ready', () => {
     document.documentElement.style.setProperty('--introbg', `url('${CTX.palazzo.seed}')`);
   }, { once: true });
-  viewer.addEventListener('dblclick', () => { if (!busy && !el('topbar').classList.contains('hidden')) walkOn(); });
+  viewer.addEventListener('dblclick', (e) => {
+    if (busy || el('topbar').classList.contains('hidden')) return;
+    const d = e && e.data;                                   // walk toward the spot the visitor aimed at
+    pendingExit = d ? { yaw: d.yaw, pitch: d.pitch } : null;
+    walkOn();
+  });
 }
-async function show(room){
+async function show(room, exit){
   if (room.panorama && room.panorama !== shownPano){
     shownPano = room.panorama;
     // never throw / never hard-hang: race the transition against a safety timeout, swallow errors
     try {
+      if (exit){
+        // step toward the chosen exit so it reads as walking through it, then arrive facing that heading
+        const pitch = Math.max(-0.25, Math.min(0.25, exit.pitch || 0));
+        try { await viewer.animate({ yaw: exit.yaw, pitch, zoom: 18, speed: '12rpm' }); } catch (e) {}
+      }
       await Promise.race([
-        viewer.setPanorama(room.panorama, { transition: true, showLoader: false, zoom: 5 }),
+        viewer.setPanorama(room.panorama, {
+          transition: true, showLoader: false, zoom: 5,
+          position: exit ? { yaw: exit.yaw, pitch: 0 } : undefined,   // arrive facing where we walked
+        }),
         sleep(12000),
       ]);
     } catch (e) { /* texture/transition hiccup — chrome already updated, image will settle */ }
@@ -256,12 +270,15 @@ async function walkOn(){
   if (busy) return;
   busy = true; hideHint();
   const C = CTX[ctx], statics = STATIC[ctx];
+  // the heading we're walking: where the visitor double-clicked, else straight ahead (button/key walks)
+  const exit = pendingExit || { yaw: (viewer && viewer.getPosition) ? viewer.getPosition().yaw : 0, pitch: 0 };
+  pendingExit = null;
   try {
     if (C.sIdx < statics.length){              // --- opening: pre-made, instant, free ---
       const room = staticRoom(ctx, statics[C.sIdx]); C.sIdx++;
       C.rooms = C.rooms.slice(0, C.cursor + 1); C.rooms.push(room); C.cursor = C.rooms.length - 1;
       paintChrome();
-      await show(room);
+      await show(room, exit);
       return;
     }
     // --- the rest: live generation, buffered ahead ---
@@ -278,7 +295,7 @@ async function walkOn(){
     }
     C.rooms = C.rooms.slice(0, C.cursor + 1); C.rooms.push(room); C.cursor = C.rooms.length - 1;
     paintChrome();
-    await show(room);
+    await show(room, exit);
   } catch (e) {
     cancelAnimationFrame(choreoRAF); el('conjure').classList.remove('on');
     notice('<b>Could not conjure the next room.</b> ' + (e.message || ''));
