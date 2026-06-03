@@ -225,7 +225,10 @@ async function walkOn(){
   busy = true; hideHint();
   const C = CTX[ctx];
   if (C.queue.length === 0) topUp(ctx);
-  const room = C.queue.shift();
+  // prefer any room whose 360 is already loaded → instant; else take the head and show the beat
+  let qi = C.queue.findIndex(r => r.ready);
+  if (qi < 0) qi = 0;
+  const room = C.queue.splice(qi, 1)[0];
   try {
     if (!room || !room.promise) throw new Error('no preparation');
     if (!room.ready){                          // image not in yet → designed wait, with its real name
