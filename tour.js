@@ -97,8 +97,8 @@ function makeRoom(world){
 
 /* ---- state ---- */
 const CTX = {
-  palazzo: { label:'Il Palazzo', rooms:[], cursor:0, seed:'img/seed-palazzo.webp', prep:null },
-  fuori:   { label:'Fuori',      rooms:[], cursor:0, seed:'img/seed-fuori.webp', prep:null },
+  palazzo: { label:'Il Palazzo', rooms:[], cursor:0, seed:'img/seed-palazzo.webp', queue:[] },
+  fuori:   { label:'Fuori',      rooms:[], cursor:0, seed:'img/seed-fuori.webp', queue:[] },
 };
 let ctx = 'palazzo', viewer = null, busy = false, hintShown = false, shownPano = null;
 
@@ -205,42 +205,45 @@ function genRoom(world, room){
     .then(panoUrl => { room.panorama = panoUrl; return room; });   // ready only after the image is downloaded+decoded
 }
 
-/* Always keep the NEXT room for a world pre-building in the background, so walking on is instant. */
-function startPrep(world){
+/* Keep a BUFFER of rooms pre-building per world, so several walk-ons in a row are instant.
+   Each queued room has its name/material decided up front and its 360 image generating +
+   preloading in the background. The buffer is refilled continuously. */
+const BUFFER = 4;                              // rooms loaded ahead per world (each ≈ 1 Skybox credit)
+function topUp(world){
   const C = CTX[world];
-  if (C.prep) return;                          // one already in flight or ready
-  const room = makeRoom(world);
-  C.prep = { room, ready: false, promise: null };
-  C.prep.promise = genRoom(world, room)
-    .then(() => { if (CTX[world].prep) CTX[world].prep.ready = true; })
-    .catch(() => { CTX[world].prep = null; });  // failed → let it retry on next demand
+  while (C.queue.length < BUFFER){
+    const room = makeRoom(world);
+    room.ready = false;
+    room.promise = genRoom(world, room).then(() => { room.ready = true; }).catch(() => { room._failed = true; });
+    C.queue.push(room);                        // concurrent: all in-flight rooms generate in parallel
+  }
 }
 
-/* Walk on: consume the pre-built room (instant if ready), else show the beat until it lands. */
+/* Walk on: take the next buffered room — instant if its 360 is already loaded, else the beat. */
 async function walkOn(){
   if (busy) return;
   busy = true; hideHint();
   const C = CTX[ctx];
-  if (!C.prep) startPrep(ctx);
-  const prep = C.prep;
+  if (C.queue.length === 0) topUp(ctx);
+  const room = C.queue.shift();
   try {
-    if (!prep || !prep.promise) throw new Error('no preparation');
-    if (!prep.ready){                          // not ready yet → designed wait, with its real name
-      startChoreo(prep.room);
-      await prep.promise;
-      await resolveName(prep.room);
+    if (!room || !room.promise) throw new Error('no preparation');
+    if (!room.ready){                          // image not in yet → designed wait, with its real name
+      startChoreo(room);
+      await room.promise;
+      if (room._failed) throw new Error('generation failed');
+      await resolveName(room);
       el('conjure').classList.remove('on');
     }
-    C.rooms = C.rooms.slice(0, C.cursor + 1); C.rooms.push(prep.room); C.cursor = C.rooms.length - 1;
-    C.prep = null;
+    C.rooms = C.rooms.slice(0, C.cursor + 1); C.rooms.push(room); C.cursor = C.rooms.length - 1;
     paintChrome();
-    await show(prep.room);
+    await show(room);
   } catch (e) {
-    cancelAnimationFrame(choreoRAF); el('conjure').classList.remove('on'); C.prep = null;
+    cancelAnimationFrame(choreoRAF); el('conjure').classList.remove('on');
     notice('<b>Could not conjure the next room.</b> ' + (e.message || ''));
   } finally {
     busy = false;
-    startPrep(ctx);                            // immediately begin building the next one ahead
+    topUp(ctx);                                // refill the buffer so the next walk-ons stay instant
   }
 }
 async function pollStatus(id){
@@ -266,12 +269,11 @@ async function switchCtx(next){
   ctx = next; root.setAttribute('data-world', ctx);
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.ctx === ctx));
   await show(CTX[ctx].rooms[CTX[ctx].cursor]); paintChrome();
-  startPrep(ctx);                              // pre-build this world's next room too
+  topUp(ctx);                                  // fill this world's buffer too
 }
 function setStyle(st){
-  // a style change invalidates a not-yet-shown prep so the next room matches the new look
-  CTX.palazzo.prep = CTX.palazzo.prep && CTX.palazzo.prep.ready ? CTX.palazzo.prep : null;
-  CTX.fuori.prep = CTX.fuori.prep && CTX.fuori.prep.ready ? CTX.fuori.prep : null;
+  // a style change discards rooms buffered in the old look; the buffer rebuilds in the new style
+  CTX.palazzo.queue = []; CTX.fuori.queue = [];
   root.setAttribute('data-style', st);
   document.querySelectorAll('.sbtn').forEach(b => b.classList.toggle('active', b.dataset.style === st));
   try { localStorage.setItem('palazzo-style', st); } catch(e){}
@@ -305,19 +307,19 @@ function hideHint(){ el('hint').classList.add('hidden'); }
 function notice(html){ let n = el('notice'); if (!n){ n = document.createElement('div'); n.id = 'notice'; document.body.appendChild(n); } n.innerHTML = html; n.classList.add('show'); setTimeout(() => n.classList.remove('show'), 6000); }
 
 /* ---- boot ---- */
-async function enter(){ el('intro').classList.add('hidden'); showChrome(true); await show(CTX[ctx].rooms[CTX[ctx].cursor]); paintChrome(); startPrep(ctx); }
+async function enter(){ el('intro').classList.add('hidden'); showChrome(true); await show(CTX[ctx].rooms[CTX[ctx].cursor]); paintChrome(); topUp(ctx); }
 function start(){
   seedWorlds();
   initViewer();
   root.setAttribute('data-world', ctx);
   setStyle((()=>{ try { return localStorage.getItem('palazzo-style'); } catch(e){ return null; } })() || 'maximal');
-  startPrep('palazzo');                        // begin building the first walk-on while the intro is read
+  topUp('palazzo');                            // start filling the buffer while the intro is read
   el('enter').addEventListener('click', enter);
   el('home').addEventListener('click', () => { el('intro').classList.remove('hidden'); showChrome(false); });
   el('restart').addEventListener('click', () => { el('closing').classList.add('hidden'); el('intro').classList.remove('hidden'); showChrome(false); });
   el('endTour').addEventListener('click', () => { showChrome(false); el('closing').classList.remove('hidden'); });
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchCtx(t.dataset.ctx)));
-  document.querySelectorAll('.sbtn').forEach(b => b.addEventListener('click', () => setStyle(b.dataset.style)));
+  document.querySelectorAll('.sbtn').forEach(b => b.addEventListener('click', () => { setStyle(b.dataset.style); topUp(ctx); }));
   document.addEventListener('keydown', e => {
     if (el('topbar').classList.contains('hidden')) return;
     if (e.key === 'ArrowLeft') back();
