@@ -17,7 +17,9 @@ export default async function handler(req, res){
   const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
   const world = body.world === 'fuori' ? 'fuori' : 'palazzo';
   const style = Number.isInteger(body.style) ? body.style : 122;
-  const seed = 8000000 + Math.floor(Math.random() * 1900000);
+  // honour the client's fixed per-world seed so every room of a visit shares one coherent
+  // look; fall back to random only if none was sent.
+  const seed = Number.isInteger(body.seed) ? body.seed : (8000000 + Math.floor(Math.random() * 1900000));
   const { prompt, negative_text } = buildPrompt(world, body.archetype, body.material);
 
   const r = await fetch('https://backend.blockadelabs.com/api/v1/skybox', {

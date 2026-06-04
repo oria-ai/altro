@@ -7,12 +7,14 @@ export function buildPrompt(world, archetype, material){
   const m = (material || '').slice(0, 40);
   if (world === 'fuori'){
     return {
-      prompt: `a sunlit Mediterranean exterior of a grand Roman palazzo on the Aventine Hill — ${a}, accented with ${m}, warm travertine and honey stone, cypress and citrus, terracotta, an open blue Roman sky, the rooftops and domes of Rome beyond, photoreal architectural photography, no people, no text`,
+      // Anchor every view to the SAME grounds: constant palette + constant light, with the
+      // room's material as a minor accent. Continuity language makes the rooms read as one place.
+      prompt: `another part of the grounds of ONE single grand Roman palazzo on the Aventine Hill — ${a}. Constant palette throughout the estate: warm travertine and honey stone, cypress and citrus, terracotta, with subtle ${m} accents. The SAME bright late-afternoon Roman sunlight, the same clear blue sky, and the rooftops and domes of Rome in the same distance as every other view — so it clearly reads as one continuous place, not a different location. Photoreal architectural photography, equirectangular 360 panorama, consistent architectural style, no people, no text`,
       negative_text: NEG,
     };
   }
   return {
-    prompt: `interior of the most opulent palace imaginable, a sumptuous fusion of Roman palazzo and Arabian-Nights palace — ${a}, richly appointed in ${m} and gold, gilded arches, intricate Moorish mosaics and tilework, polychrome marble floor, carved muqarnas honeycomb ceiling, crystal lamps, silk drapery, a marble fountain, lavish maximalist grandeur, warm golden light, photoreal, no people, no text`,
+    prompt: `another room inside ONE single continuous palace — the most opulent imaginable, a sumptuous fusion of Roman palazzo and Arabian-Nights palace. This room is ${a}, with subtle ${m} accents over the palace's constant scheme of warm honey marble and polished gold. The SAME architecture throughout every room: gilded arches, intricate Moorish mosaics and tilework, polychrome marble floors, carved muqarnas honeycomb ceilings, crystal lamps, silk drapery. The same warm golden interior light and the same palette as every other room, so it unmistakably reads as the same building, not a different palace. Photoreal architectural photography, equirectangular 360 panorama, consistent architectural style, no people, no text`,
     negative_text: NEG,
   };
 }

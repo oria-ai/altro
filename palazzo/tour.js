@@ -117,8 +117,8 @@ function makeRoom(world){
 
 /* ---- state ---- */
 const CTX = {
-  palazzo: { label:'Il Palazzo', rooms:[], cursor:0, sIdx:1, seed:'img/seed-palazzo.webp', queue:[] },
-  fuori:   { label:'Fuori',      rooms:[], cursor:0, sIdx:1, seed:'img/seed-fuori.webp', queue:[] },
+  palazzo: { label:'Il Palazzo', rooms:[], cursor:0, sIdx:1, seed:'img/seed-palazzo.webp', queue:[], houseSeed:0 },
+  fuori:   { label:'Fuori',      rooms:[], cursor:0, sIdx:1, seed:'img/seed-fuori.webp', queue:[], houseSeed:0 },
 };
 let ctx = 'palazzo', viewer = null, markers = null, busy = false, hintShown = false, shownPano = null;
 let pendingExit = null;   // {yaw,pitch} the visitor double-clicked toward → the direction we walk
@@ -146,6 +146,10 @@ function clearExit(){ if (markers){ try { markers.clearMarkers(); } catch (e) {}
 function seedWorlds(){
   CTX.palazzo.rooms = [ staticRoom('palazzo', STATIC.palazzo[0]) ]; CTX.palazzo.sIdx = 1;
   CTX.fuori.rooms   = [ staticRoom('fuori',   STATIC.fuori[0]) ];   CTX.fuori.sIdx = 1;
+  // one fixed seed per world for this visit → every conjured room shares a coherent look,
+  // so the palace reads as ONE continuous building rather than a slideshow of styles.
+  CTX.palazzo.houseSeed = 8000000 + (Math.random() * 1900000 | 0);
+  CTX.fuori.houseSeed   = 8000000 + (Math.random() * 1900000 | 0);
 }
 /* Warm the browser cache for a world's pre-made rooms so their crossfades are instant. */
 function preloadStatics(world){ STATIC[world].forEach(d => preloadPano(d.panorama)); }
@@ -167,15 +171,14 @@ function initViewer(){
   }, { once: true });
   // clicking the exit arrow walks on
   if (markers) markers.addEventListener('select-marker', () => { if (!busy && !el('topbar').classList.contains('hidden')) walkThroughExit(); });
-  // double-click: in the exit area → walk on; anywhere else → move in (zoom toward the spot)
-  viewer.addEventListener('dblclick', (e) => {
+  // SINGLE-CLICK anywhere walks you on toward the spot you clicked — the next room is
+  // conjured in that direction, so clicking the way you want to go just works. (Dragging
+  // to look around does not emit a click, so you can still explore freely. Wheel to zoom.)
+  viewer.addEventListener('click', (e) => {
     if (busy || el('topbar').classList.contains('hidden')) return;
     const d = e && e.data; if (!d) return;
-    const inExit = Math.abs(angDiff(d.yaw, exitYaw)) < 0.55 && d.pitch < 0.05;
-    if (inExit){ walkThroughExit(); return; }
-    // move in: glide toward the clicked point and zoom a little, like stepping closer
-    const z = viewer.getZoomLevel ? viewer.getZoomLevel() : 5;
-    try { viewer.animate({ yaw: d.yaw, pitch: Math.max(-0.5, Math.min(0.5, d.pitch)), zoom: Math.min(60, z + 22), speed: '8rpm' }); } catch (err) {}
+    pendingExit = { yaw: d.yaw, pitch: Math.max(-0.3, Math.min(0.3, d.pitch || 0)) };
+    walkOn();
   });
 }
 async function show(room, exit){
@@ -261,7 +264,7 @@ function genRoom(world, room){
   const style = STYLE_ID[root.getAttribute('data-style')] || 122;
   return fetch('/api/conjure', {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ world, style, archetype: room.arch.kind || room.arch.en, material: room.mat.en }),
+    body: JSON.stringify({ world, style, archetype: room.arch.kind || room.arch.en, material: room.mat.en, seed: CTX[world].houseSeed }),
   }).then(r => { if (!r.ok) throw new Error('conjure ' + r.status); return r.json(); })
     .then(({ id }) => pollStatus(id))
     .then(url => preloadPano('/api/pano?u=' + encodeURIComponent(url)))
