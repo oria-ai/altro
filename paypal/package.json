@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "paypal-agent",
+  "description": "PayPal management agent — orders, refunds, transactions, payouts. Secrets from Doppler (oria/prd).",
+  "bin": {
+    "pp": "bin/pp.mjs"
+  },
+  "scripts": {
+    "pp": "doppler run --project oria --config prd -- node bin/pp.mjs"
+  }
+}
