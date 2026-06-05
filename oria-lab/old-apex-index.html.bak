@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>meshugaim.org</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    background: #bfe0e6;
+  }
+  /* layered natural scene: sky -> sea -> sand */
+  .scene {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(120% 80% at 78% 14%, rgba(255,247,214,0.95) 0%, rgba(255,247,214,0) 42%),
+      linear-gradient(
+        to bottom,
+        #cfeaf0 0%,
+        #bfe0e6 26%,
+        #7cc0c4 38%,
+        #4aa6a6 46%,
+        #2f8e96 60%,
+        #2f8e96 64%,
+        #d8c79a 64.4%,
+        #e7d7ad 80%,
+        #efe2bf 100%
+      );
+  }
+  /* sun glow */
+  .sun {
+    position: fixed; top: 9%; left: 76%;
+    width: 130px; height: 130px; border-radius: 50%;
+    background: radial-gradient(circle, #fff7d6 0%, rgba(255,247,214,0.65) 40%, rgba(255,247,214,0) 70%);
+    filter: blur(2px);
+  }
+  /* sea shimmer */
+  .sea-shimmer {
+    position: fixed; left: 0; right: 0; top: 46%; height: 18%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.18), rgba(255,255,255,0) 60%);
+    mix-blend-mode: screen;
+    animation: shimmer 7s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0%,100% { opacity:.35 } 50% { opacity:.7 } }
+
+  canvas#entropy { position: fixed; inset: 0; display: block; }
+
+  /* lone wind-bent tree silhouette */
+  .tree { position: fixed; bottom: 30%; left: 9%; width: min(220px, 34vw); height: auto; opacity: .92; }
+
+  .content {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 24px; z-index: 5;
+  }
+  h1 {
+    margin: 0; font-weight: 300; letter-spacing: 0.06em;
+    font-size: clamp(30px, 6.5vw, 58px);
+    color: #f7fbfb;
+    text-shadow: 0 2px 18px rgba(20,60,70,0.45);
+  }
+  .rule { width: 46px; height: 1px; background: rgba(255,255,255,0.7); margin: 26px auto; }
+  p {
+    margin: 0; font-weight: 300; letter-spacing: 0.18em; text-transform: uppercase;
+    font-size: clamp(12px, 2.2vw, 15px);
+    color: rgba(255,255,255,0.92);
+    text-shadow: 0 1px 10px rgba(20,60,70,0.4);
+  }
+</style>
+</head>
+<body>
+  <div class="scene"></div>
+  <div class="sun"></div>
+  <div class="sea-shimmer"></div>
+  <canvas id="entropy"></canvas>
+
+  <svg class="tree" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- trunk leaning with the wind -->
+    <path d="M96 200 C 92 150, 88 120, 104 92 C 110 82, 118 74, 120 66"
+          stroke="#1f3a2b" stroke-width="7" stroke-linecap="round"/>
+    <!-- wind-blown canopy fronds -->
+    <g stroke="#1f3a2b" stroke-width="5" stroke-linecap="round" fill="none">
+      <path d="M120 66 C 150 56, 178 58, 196 50"/>
+      <path d="M120 66 C 150 50, 176 38, 190 24"/>
+      <path d="M120 66 C 146 60, 170 70, 188 74"/>
+      <path d="M120 66 C 138 48, 150 30, 156 12"/>
+      <path d="M120 66 C 132 52, 138 34, 138 16"/>
+    </g>
+  </svg>
+
+  <div class="content">
+    <h1>meshugaim.org</h1>
+    <div class="rule"></div>
+    <p>Coming&nbsp;soon</p>
+  </div>
+
+  <script>
+    // Entropy layer: particles on a random walk (Brownian motion) — order dissolving into disorder.
+    const c = document.getElementById('entropy');
+    const ctx = c.getContext('2d');
+    let w, h, parts;
+    const COLORS = ['rgba(255,247,220,0.55)','rgba(220,238,238,0.5)','rgba(231,215,173,0.55)','rgba(120,170,170,0.4)'];
+    function resize() {
+      w = c.width = innerWidth; h = c.height = innerHeight;
+      const n = Math.round((w * h) / 14000);
+      parts = Array.from({length: n}, () => ({
+        x: Math.random() * w, y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 1.8 + 0.4,
+        col: COLORS[(Math.random() * COLORS.length) | 0]
+      }));
+    }
+    function step() {
+      ctx.clearRect(0, 0, w, h);
+      for (const p of parts) {
+        // random-walk acceleration = diffusion = entropy increasing
+        p.vx += (Math.random() - 0.5) * 0.08;
+        p.vy += (Math.random() - 0.5) * 0.08;
+        p.vx *= 0.96; p.vy *= 0.96;
+        p.x += p.vx + 0.12;   // faint drift, like wind over sand
+        p.y += p.vy;
+        if (p.x > w + 5) p.x = -5; if (p.x < -5) p.x = w + 5;
+        if (p.y > h + 5) p.y = -5; if (p.y < -5) p.y = h + 5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.col;
+        ctx.fill();
+      }
+      requestAnimationFrame(step);
+    }
+    addEventListener('resize', resize);
+    resize(); step();
+  </script>
+</body>
+</html>
