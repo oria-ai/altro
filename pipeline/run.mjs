@@ -124,6 +124,7 @@ For each category (blur, outdoor, indoor, creative): pick the single strongest i
 1. Begin with: "Take the exact stone from the provided photo — preserve its shape, texture, colors and every distinctive feature faithfully —"
 2. Then describe placement, setting, lighting, camera/lens feel, and mood in rich detail.
 3. For "blur": the background must be sophisticatedly blurred (shallow depth of field, refined bokeh), stone in crisp focus.
+4. Composition: the stone is the centered subject — dead center of the frame, hero of the shot.
 
 Also write a short poetic caption (under 12 words) per category.
 
@@ -132,8 +133,13 @@ Return ONLY JSON:
   return parseJson(await callGemini(TEXT_MODEL, [{ text: prompt }]), "design");
 }
 
+// Hard composition rule appended to every generation, independent of what the
+// design stage wrote — the stone must end up centered in the frame.
+const COMPOSITION_RULE =
+  " Composition requirement: the stone is perfectly centered in the frame, both horizontally and vertically — it is the clear central subject of the image.";
+
 async function stageGenerate(imagePart, designedPrompt) {
-  return callGemini(IMAGE_MODEL, [imagePart, { text: designedPrompt }], { imageOut: true });
+  return callGemini(IMAGE_MODEL, [imagePart, { text: designedPrompt + COMPOSITION_RULE }], { imageOut: true });
 }
 
 // ---- Per-stone driver ------------------------------------------------------
