@@ -16,25 +16,15 @@
 
   <div id="lightbox" class="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true">
     <button class="lightbox-close" aria-label="Close">&times;</button>
+    <h2 id="lightboxTitle" class="lightbox-title"></h2>
 
     <div class="slider">
-      <button class="slider-nav prev" aria-label="Previous background">&#10094;</button>
+      <button class="slider-nav prev" aria-label="Previous variant">&#10094;</button>
       <div class="slider-track" id="sliderTrack"></div>
-      <button class="slider-nav next" aria-label="Next background">&#10095;</button>
+      <button class="slider-nav next" aria-label="Next variant">&#10095;</button>
     </div>
 
-    <div class="dots" id="sliderDots" aria-label="Background selector"></div>
-
-    <form class="prompt-bar" id="promptForm" autocomplete="off">
-      <input
-        type="text"
-        id="promptInput"
-        class="prompt-input"
-        placeholder="Place this stone somewhere… e.g. on a mossy riverbank at dawn"
-        aria-label="Background prompt"
-      />
-      <button type="submit" class="prompt-submit">Generate</button>
-    </form>
+    <div class="dots" id="sliderDots" aria-label="Variant selector"></div>
   </div>
 
   <script src="app.js" type="module"></script>

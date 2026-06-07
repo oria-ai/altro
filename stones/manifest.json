@@ -1,0 +1,26 @@
+[
+  {
+    "id": "sample-river",
+    "name": "River Sentinel",
+    "character": "The stone projects an aura of serene permanence and quiet strength, a steadfast and ancient observer of the river's ceaseless flow.",
+    "original": "stones/sample-river/original.png",
+    "variants": {
+      "blur": {
+        "src": "stones/sample-river/blur.jpg",
+        "caption": "Reflecting depths, grounded in serenity."
+      },
+      "outdoor": {
+        "src": "stones/sample-river/outdoor.jpg",
+        "caption": "River's heart, sunlit stream."
+      },
+      "indoor": {
+        "src": "stones/sample-river/indoor.jpg",
+        "caption": "Art of earth, polished and profound."
+      },
+      "creative": {
+        "src": "stones/sample-river/creative.jpg",
+        "caption": "Cosmic wanderer, stardust heart."
+      }
+    }
+  }
+]
