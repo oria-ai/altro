@@ -1,0 +1,20 @@
+{
+  "name": "uni-tutor",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Logs into a university site once, saves the session, and reuses it to pull course material for an AI tutor.",
+  "scripts": {
+    "probe": "node src/probe.js",
+    "auth": "node src/auth.js",
+    "fetch": "node src/fetch.js",
+    "crawl": "node src/crawl.js",
+    "learn": "node src/learn.js",
+    "solve": "node src/solve.js",
+    "tutor": "node src/tutor.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "playwright": "^1.49.0"
+  }
+}

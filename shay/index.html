@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stones</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Stones</h1>
+    <p class="tagline">A quiet collection. Click any stone to wander through its skies.</p>
+  </header>
+
+  <main id="gallery" class="gallery" aria-label="Stone gallery"></main>
+
+  <div id="lightbox" class="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true">
+    <button class="lightbox-close" aria-label="Close">&times;</button>
+    <h2 id="lightboxTitle" class="lightbox-title"></h2>
+
+    <div class="slider">
+      <button class="slider-nav prev" aria-label="Previous variant">&#10094;</button>
+      <div class="slider-track" id="sliderTrack"></div>
+      <button class="slider-nav next" aria-label="Next variant">&#10095;</button>
+    </div>
+
+    <div class="dots" id="sliderDots" aria-label="Variant selector"></div>
+  </div>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>

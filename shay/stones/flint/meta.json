@@ -1,0 +1,82 @@
+{
+  "slug": "flint",
+  "sourceFile": "flint.jpg",
+  "original": "original.jpg",
+  "analysis": {
+    "name": "Banded Flint",
+    "description": "This irregular, angular stone fragment exhibits a striking contrast between its dark brown, earthy outer layer and a predominantly milky white to pale grey inner core. Its fractured surfaces are smooth and lustrous, revealing characteristic conchoidal patterns and subtle color transitions within its crystalline structure.",
+    "shape": "Irregular, angular, and somewhat slab-like, with sharp edges from recent fractures.",
+    "colors": "Dominantly dark earthy brown, milky white, and light grey-blue, with areas of very faint pinkish-brown and sparse rust-colored inclusions.",
+    "texture": "Smooth to waxy on its main fractured surfaces, displaying characteristic conchoidal ripples; the outer brown layer appears duller and slightly rougher.",
+    "character": "A testament to geological time and powerful forces, this stone exudes a quiet strength and reveals an elegant, hidden complexity.",
+    "distinctive_features": [
+      "Distinct two-tone banding (dark brown outer layer, lighter inner core)",
+      "Prominent conchoidal fracture patterns with ripple marks on the pale surfaces",
+      "Smooth, semi-lustrous quality of the fractured surfaces",
+      "Subtle internal color gradations (white to grey to faint pink)",
+      "Occasional small, rust-colored mineral specks"
+    ]
+  },
+  "brainstorm": {
+    "blur": [
+      "A soft, blurred background of deep forest green and muted teal, allowing the stone's earthy browns and grey-blues to pop with serene elegance.",
+      "Stone resting on a highly polished, dark wood surface, with the blurred reflections of soft, warm light playing in the background, emphasizing its waxy texture and subtle sheen.",
+      "Against a gradient blur of cool misty grey blending into a soft, desaturated blush pink, creating a serene and sophisticated backdrop for the stone's internal subtleties.",
+      "Sharp against a rich, velvety blur of burnt orange and deep charcoal, drawing out the stone's brown and rust tones while letting its milky white core shine."
+    ],
+    "outdoor": [
+      "Nestled among weathered granite boulders and lichen-covered rocks on a desolate, windswept mountain ridge, emphasizing its ancient origins and resilience.",
+      "Half-submerged in clear, shallow stream water over smooth, dark river stones, with sunlight dappling through overhead leaves, highlighting its lustrous surfaces.",
+      "Resting on dark, wet volcanic sand at the edge of a turbulent, grey-blue ocean, with sea spray on its surface, contrasting its polished interior with rugged nature.",
+      "Peeking out from under a scattering of damp, fallen oak leaves and vibrant green moss on the rich, dark soil of an old-growth forest, conveying quiet discovery."
+    ],
+    "indoor": [
+      "Precisely lit in a minimalist museum display case with a dark, matte background, allowing its intricate conchoidal patterns and internal color gradations to be the sole focus.",
+      "Resting on a worn leather-bound book, beside an antique magnifying glass and a feather quill, suggesting scholarly appreciation of its geological beauty.",
+      "Placed as a singular sculptural element on a polished concrete pedestal or a raw, unfinished wood slab in a sun-drenched, stark modern interior.",
+      "Positioned on a swatch of raw silk or coarse linen fabric in muted cream or charcoal, with soft, directional light revealing its varied textures and subtle luster."
+    ],
+    "creative": [
+      "Suspended in a swirling nebula of diffused light and color, resembling a fragment broken from a distant, ancient celestial body, emphasizing its geological time scale.",
+      "Emerging from a shimmering, liquid mercury pool, half-submerged, with its polished surfaces reflecting distorted light, suggesting a hidden world being revealed.",
+      "A colossal version of the stone, seemingly broken from an ancient, impossible structure, floating majestically against a stormy, dramatic sky.",
+      "Placed centrally on a flat, reflective surface, surrounded by intricate gears and clockwork mechanisms, with faint, ethereal light emanating from its core, hinting at its ancient narrative."
+    ]
+  },
+  "design": {
+    "blur": {
+      "prompt": "Take the exact stone from the provided photo — preserve its shape, texture, colors and every distinctive feature faithfully — resting flat, slightly angled to show its two-tone banding and fractured surfaces. The background is a sophisticatedly blurred gradient transitioning from a cool misty grey at the top to a soft, desaturated blush pink at the bottom, creating creamy bokeh. Soft, diffused natural light from a window highlights the waxy luster of the fractured surfaces and the subtle internal color gradations, without harsh shadows. A gentle highlight catches a conchoidal ripple. Macro shot with a fast prime lens (e.g., 100mm f/2.8), capturing every detail of the stone's texture and color transitions, with crisp focus on the stone and extreme background blur. The mood is serene, elegant, and contemplative, emphasizing the stone's inherent beauty and hidden complexity.",
+      "caption": "Whispers of ancient earth, softly revealed."
+    },
+    "outdoor": {
+      "prompt": "Take the exact stone from the provided photo — preserve its shape, texture, colors and every distinctive feature faithfully — half-submerged in crystal-clear, shallow stream water, resting gently atop smooth, dark river stones. Its lighter, fractured core is visible through the water, glistening. The stream bed extends slightly behind, with hints of verdant moss and pebbles. Overhead, lush green leaves create a canopy, with patches of natural sunlight dappling and shimmering on the water's surface and the exposed parts of the stone. The light emphasizes its lustrous, waxy fractured surfaces and reveals its internal colors more vibrantly, with the submerged part appearing slightly magnified. Eye-level perspective, slightly above the water, using a macro lens to capture the stone's details and the clarity of the water. The surrounding stream environment is in soft focus, drawing attention to the stone. The mood is tranquil, natural, a moment of peaceful discovery, highlighting the stone's natural beauty and the interplay of light and water.",
+      "caption": "Water-kissed, an ancient heart revealed."
+    },
+    "indoor": {
+      "prompt": "Take the exact stone from the provided photo — preserve its shape, texture, colors and every distinctive feature faithfully — impeccably displayed within a minimalist, custom-built museum display case. It rests on a small, dark, matte pedestal, slightly elevated. The case itself is sleek, with clear, anti-reflective glass. The immediate background inside the case is a deep, uniform matte charcoal grey or black, ensuring no distractions. Precisely controlled, focused LED spotlights from above and slightly to the side illuminate the stone, specifically aimed to accentuate the conchoidal fracture patterns, the waxy luster of the smooth surfaces, and the subtle transitions between the milky white, grey-blue, and faint pinkish-brown internal colors. A very slight, soft shadow beneath the stone gives it dimension. A professional studio shot with a prime macro lens, emphasizing extreme clarity and sharpness. The composition is clean and centered, allowing the stone to be the singular object of intense scrutiny. The mood is reverent, academic, showcasing the stone as a geological artifact of immense beauty and scientific interest, encouraging close examination.",
+      "caption": "Geological art, precisely unveiled."
+    },
+    "creative": {
+      "prompt": "Take the exact stone from the provided photo — preserve its shape, texture, colors and every distinctive feature faithfully — floating majestically in the vastness of space, seemingly suspended within a swirling nebula. The nebula's gases and dust are a harmonious blend of muted deep blues, purples, soft greys, and faint reddish-browns, echoing the stone's own color palette. The nebula creates a cosmic, ethereal backdrop, with distant, faint stars blurring into the light and color. Ethereal, diffused light emanates from the nebula itself, softly illuminating the stone from all sides. A stronger, yet still gentle, light source highlights its smooth, lustrous fractured surfaces and the prominent conchoidal patterns, making them glow subtly. The dark outer layer provides a stark contrast against the cosmic canvas. A wide-angle, cinematic shot, making the stone appear significant yet small within the grandeur of the cosmos. The stone is in sharp focus, while the nebula creates a sense of immense depth and movement. The mood is awe-inspiring, timeless, and mysterious, suggesting the stone is a fragment of ancient cosmic history, emphasizing its profound geological age and silent power.",
+      "caption": "A star-shard, eons in its core."
+    }
+  },
+  "variants": {
+    "blur": {
+      "file": "blur.jpg",
+      "caption": "Whispers of ancient earth, softly revealed."
+    },
+    "outdoor": {
+      "file": "outdoor.jpg",
+      "caption": "Water-kissed, an ancient heart revealed."
+    },
+    "indoor": {
+      "file": "indoor.jpg",
+      "caption": "Geological art, precisely unveiled."
+    },
+    "creative": {
+      "file": "creative.jpg",
+      "caption": "A star-shard, eons in its core."
+    }
+  }
+}

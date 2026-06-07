@@ -1,0 +1,5 @@
+# Live session cookies / auth tokens — NEVER commit these.
+.session/
+node_modules/
+# Scraped course content + generated notes/solutions — keep private.
+data/
