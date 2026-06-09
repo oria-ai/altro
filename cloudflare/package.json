@@ -1,0 +1,28 @@
+{
+  "name": "cloudflare-vercel-integration",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Vercel Marketplace integration reselling Cloudflare services (Workers AI, KV, D1, R2, Turnstile) via a metered proxy.",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:init": "bun run scripts/db-init.ts"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "@vercel/sdk": "^1.9.2",
+    "next": "^15.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.8.3"
+  }
+}
