@@ -58,5 +58,12 @@ be a later decision if ever needed.
 
 ## Decision
 
-- [x] **DECIDED 2026-06-12: A — עמותה** (Oria, in-session).
-- Open sub-items: 2nd founder (חוק העמותות requires ≥2), name + 2 alternates.
+- ~~2026-06-12: A — עמותה~~ **SUPERSEDED same day.**
+- [x] **DECIDED 2026-06-12 (v2): C — חל"צ, registered by Oria alone.**
+  Reason: עמותה legally requires ≥2 founders; 2nd founder not available now
+  and Oria prioritizes registering immediately. חל"צ allows a single
+  shareholder+director, keeps the no-dividend ethical lock.
+- ⚠ Known follow-up: a חל"צ must appoint ועדת ביקורת (audit committee) —
+  practically means adding 1-2 people to the board later; not a registration
+  blocker.
+- Open sub-items: final name + Hebrew alternates.

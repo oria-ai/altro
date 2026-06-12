@@ -4,15 +4,19 @@ Each section = one sitting at the keyboard (host browser, your ת"ז /
 הזדהות ממשלתית). Gin prepared the content; you click and paste.
 Order matters only where marked.
 
-## 0. Entity registration (עמותה — decided)  ⛔ blocks 1, 2, 3
-**Where:** https://www.gov.il/he/service/association_registration
-(רשות התאגידים; the amuta_registration URL is dead — 404).
-**Founders can file directly** with הזדהות ממשלתית — no lawyer/smart-card
-needed (CSF guide, verified 2026-06-12).
-**Bring:** 3 name options (Hebrew), 2+ founders (name, ת"ז, address),
-association address + proof, email+phone, bylaws choice (תקנון מצוי = fastest),
-purposes text from `entity-decision.md`, fee (~₪900).
-**Time:** ~30 min filing; approval 8 days (תקנון מצוי) to 21 (מיוחד).
+## 0. Entity registration (חל"צ — decided v2, solo)  ⛔ blocks 1, 2, 3
+**Where:** תאגידים ONLINE — רישום חברה:
+https://ica.justice.gov.il/IcaSite/request-type-menu/8/1
+(login with הזדהות ממשלתית). Mark the company as **חברה לתועלת הציבור**
+in the registration request.
+**Solo is legal:** one person may be sole shareholder + sole director.
+**Bring:** company name + Hebrew alternates, Oria's ת"ז + address,
+the חל"צ תקנון (draft: `halatz-takanon-draft.md` — public purposes,
+no-dividend, asset-transfer-on-dissolution clauses are MANDATORY for חל"צ),
+declarations (directors + shareholders) per the form, fee (~₪1,200).
+**After registration:** the חל"צ must also be registered with רשם ההקדשות
+(parallel track at רשות התאגידים) and appoint ועדת ביקורת.
+**Time:** filing ~40 min; חל"צ requests get manual review — days to weeks.
 
 ## 1. רשות המסים — שירותים דיגיטליים + חיבור בית תוכנה
 **Where:** https://signup.taxes.gov.il/SrRishum then

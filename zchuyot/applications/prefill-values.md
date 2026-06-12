@@ -1,13 +1,13 @@
 # Pre-fill cheat-sheet — paste-ready values for every form
 
 Goal: when the 2nd founder's details arrive, finishing everything is ~1 minute.
-Status: ⏸ PAUSED 2026-06-12 waiting on friend's details.
+Status: ▶ ACTIVE again 2026-06-12 — pivoted to חל"צ solo (no friend needed).
 
 ## Known values (paste anywhere needed)
 
 | Field | Value |
 |---|---|
-| שם העמותה המבוקש | sagur.com (ע"ר) — ⚠ expect rejection; prep 2 Hebrew alternates |
+| שם החברה המבוקש | sagur.com (חל"צ) — ⚠ expect rejection of ".com"; prep 2 Hebrew alternates |
 | מייסד 1 — שם | אוריה מסס |
 | מייסד 1 — ת"ז | 207113861 |
 | מייסד 1 — כתובת | יפה נוף 50, אמירים |
