@@ -1,6 +1,4 @@
 .env.local
 out/stone.glb
-shots/t_az*.png
-shots/sw_*.png
-shots/az*.png
-shots/live_*.png
+shots/*
+!shots/hero.png

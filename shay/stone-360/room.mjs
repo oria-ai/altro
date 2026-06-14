@@ -5,7 +5,7 @@ import { run, download } from './lib.mjs';
 const FLUX360 = 'd26037255a2b298408505e2fbd0bf7703521daca8f07e8c8f335ba874b4aa11a';
 
 // Room panorama height (2:1 equirect => width = 2*height). Keep light.
-export const ROOM_H = 360;          // 720 x 360 — smooth on integrated GPU
+export const ROOM_H = 720;          // 1440 x 720 — flux-360 native max, ~1MP (light)
 
 export async function generateRoom(userPrompt, outPath) {
   const prompt = `equirectangular 360 panorama, ${userPrompt}, seamless, photorealistic interior`;

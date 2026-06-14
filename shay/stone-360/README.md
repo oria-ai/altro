@@ -45,6 +45,19 @@ From the shaym.beauty manifest: **boulder** (Striped Sentinel, 85 cm) and
 **flint** (Banded Flint, 14 cm). Add more by generating `out/stone-<id>.glb`
 and adding an entry to `STONES` in `viewer.html`.
 
+## Realism pass (Gemini-in-the-loop)
+`critique.mjs` sends a render to Gemini Vision and asks why it looks fake; fixes
+were applied iteratively until realism went "pasted-on" → **7/10**:
+- IBL: the room panorama lights the stone (no more pasted-on lighting).
+- `matchSun()` auto-aims the key light at the room's brightest window.
+- `matchFloor()` color-matches a reflective ground plane to the room's floor; it
+  fades into the panorama so the plinth stands on continuous ground.
+- Faded **mirror reflection** of stone + plinth in the floor.
+- **Depth of field** (BokehPass) — stone in focus, room softens, edges not cut-out.
+- Soft shadows + contact decals + procedurally-textured plinth.
+
+Run: `GEMINI_AI_STUDIO=$(doppler secrets get GEMINI_AI_STUDIO --plain -p oria -c dev) node critique.mjs shots/hero.png`
+
 ## Notes
 - Each "Generate room" is a real Replicate spend (~$0.02). Account <$5 credit →
   throttled to burst-1 (handled by retry in `lib.mjs`). IPv4 here is flaky →

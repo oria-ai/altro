@@ -66,8 +66,11 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-// stone catalog (dims in cm, from the shaym.beauty manifest)
 const STONES = {
   boulder: { name: 'Striped Sentinel', glb: 'out/stone-boulder.glb', w: 85, h: 62, d: 55 },
   flint:   { name: 'Banded Flint',     glb: 'out/stone-flint.glb',   w: 14, h: 9,  d: 7  },
@@ -86,112 +89,197 @@ const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMapping = THREE.NoToneMapping;     // OutputPass applies ACES at the end of the chain
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(52, innerWidth/innerHeight, 0.01, 100);
+const camera = new THREE.PerspectiveCamera(46, innerWidth/innerHeight, 0.01, 100);
 
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true; controls.dampingFactor = 0.08;
 controls.minDistance = 0.35; controls.maxDistance = 7;
 controls.maxPolarAngle = Math.PI * 0.52;
 controls.autoRotate = (AZ === null);
-controls.autoRotateSpeed = 0.6;
-
-// pause auto-rotate while the user drives, resume after idle
+controls.autoRotateSpeed = 0.55;
 let idleT;
 controls.addEventListener('start', () => { controls.autoRotate = false; clearTimeout(idleT); });
 controls.addEventListener('end', () => { if (AZ === null) idleT = setTimeout(() => controls.autoRotate = true, 3500); });
 
-// ---- lights + shadow ----
-scene.add(new THREE.HemisphereLight(0xffffff, 0x404040, 0.5));
-const key = new THREE.DirectionalLight(0xffffff, 1.4);
-key.position.set(2.5, 4.5, 2.0); key.castShadow = true;
-key.shadow.mapSize.set(2048, 2048);
-Object.assign(key.shadow.camera, { left:-2, right:2, top:2, bottom:-2, near:0.1, far:14 });
-key.shadow.bias = -0.0004; scene.add(key);
+// ---- lighting: the ROOM lights the stone (IBL). One soft sun only for a gentle shadow. ----
+scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 0.18));
+const sun = new THREE.DirectionalLight(0xfff2e0, 0.45);  // warm, low — just to drop a soft shadow
+sun.position.set(2.2, 5.0, 1.6); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); sun.shadow.radius = 9; sun.shadow.blurSamples = 18;
+Object.assign(sun.shadow.camera, { left:-2, right:2, top:2, bottom:-2, near:0.1, far:16 });
+sun.shadow.bias = -0.0004; scene.add(sun);
 
-// ---- floor shadow-catcher ----
+// ---- soft contact-shadow decal (radial gradient) — guarantees grounding under any light ----
+function contactTex() {
+  const s = 256, cv = document.createElement('canvas'); cv.width = cv.height = s;
+  const g = cv.getContext('2d').createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+  g.addColorStop(0,'rgba(0,0,0,0.42)'); g.addColorStop(0.5,'rgba(0,0,0,0.20)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  const ctx = cv.getContext('2d'); ctx.fillStyle = g; ctx.fillRect(0,0,s,s);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const CONTACT = contactTex();
+function contactDecal(w, d, y) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d).rotateX(-Math.PI/2),
+    new THREE.MeshBasicMaterial({ map: CONTACT, transparent:true, depthWrite:false, opacity:0.9 }));
+  m.position.y = y; m.renderOrder = 1; m.name = 'decal'; return m;
+}
+
+// ---- procedural plinth material (warm plaster + subtle mottle + bottom AO) ----
+function plinthMat() {
+  const s = 512, cv = document.createElement('canvas'); cv.width = cv.height = s; const x = cv.getContext('2d');
+  x.fillStyle = '#e7e0d4'; x.fillRect(0,0,s,s);
+  for (let i=0;i<14000;i++){ const a=Math.random()*0.11; x.fillStyle=`rgba(${120+Math.random()*90|0},${110+Math.random()*85|0},${95+Math.random()*80|0},${a})`;
+    x.fillRect(Math.random()*s, Math.random()*s, 1+Math.random()*3, 1+Math.random()*3); }
+  // faint vertical veining for a worked-stone/plaster read
+  for (let i=0;i<28;i++){ x.strokeStyle=`rgba(140,130,118,${0.04+Math.random()*0.05})`; x.lineWidth=1+Math.random()*2;
+    x.beginPath(); const vx=Math.random()*s; x.moveTo(vx,0); x.bezierCurveTo(vx+20-Math.random()*40,s*0.4,vx+20-Math.random()*40,s*0.7,vx+10-Math.random()*20,s); x.stroke(); }
+  const grad = x.createLinearGradient(0,0,0,s); grad.addColorStop(0,'rgba(0,0,0,0)'); grad.addColorStop(1,'rgba(0,0,0,0.10)');
+  x.fillStyle = grad; x.fillRect(0,0,s,s);
+  const map = new THREE.CanvasTexture(cv); map.colorSpace = THREE.SRGBColorSpace; map.anisotropy = 4;
+  return new THREE.MeshStandardMaterial({ map, roughness: 0.62, metalness: 0.0, envMapIntensity: 0.7 });
+}
+
+// ---- real floor: reflects the room, color-matched, fades into the panorama so the
+//      stand rests on continuous ground (the biggest "embedded" cue). ----
+function floorAlpha() {
+  const s = 256, cv = document.createElement('canvas'); cv.width = cv.height = s;
+  const g = cv.getContext('2d').createRadialGradient(s/2,s/2,s*0.10,s/2,s/2,s/2);
+  g.addColorStop(0,'#fff'); g.addColorStop(0.55,'#bbb'); g.addColorStop(1,'#000');
+  const x = cv.getContext('2d'); x.fillStyle = g; x.fillRect(0,0,s,s);
+  return new THREE.CanvasTexture(cv);
+}
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(12, 12).rotateX(-Math.PI/2),
-  new THREE.ShadowMaterial({ opacity: 0.32 })
+  new THREE.CircleGeometry(6, 96).rotateX(-Math.PI/2),
+  new THREE.MeshStandardMaterial({ color: 0xb49a78, roughness: 0.30, metalness: 0.0,
+    envMapIntensity: 1.0, transparent: true, alphaMap: floorAlpha() })
 );
-floor.receiveShadow = true; scene.add(floor);
+floor.receiveShadow = true; floor.position.y = 0; scene.add(floor);
+
+// sample the room's own floor colour (lower-centre of the panorama) so our floor matches
+function matchFloor(image) {
+  const w = 64, h = 32, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const x = cv.getContext('2d'); x.drawImage(image, 0, 0, w, h);
+  const d = x.getImageData(Math.floor(w*0.35), Math.floor(h*0.72), Math.floor(w*0.3), Math.floor(h*0.2)).data;
+  let r=0,g=0,b=0,n=0; for (let i=0;i<d.length;i+=4){ r+=d[i]; g+=d[i+1]; b+=d[i+2]; n++; }
+  floor.material.color.setRGB((r/n/255)**2.2, (g/n/255)**2.2, (b/n/255)**2.2);
+}
 
 // ---- 360 room (swappable) ----
 let skyMat = null;
 const pmrem = new THREE.PMREMGenerator(renderer);
 function loadRoom(url) {
   new THREE.TextureLoader().load(url, (tex) => {
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.mapping = THREE.EquirectangularReflectionMapping;
-    if (!skyMat) {
-      skyMat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide });
-      scene.add(new THREE.Mesh(new THREE.SphereGeometry(20, 64, 32), skyMat));
-    } else { skyMat.map?.dispose(); skyMat.map = tex; skyMat.needsUpdate = true; }
-    scene.environment = pmrem.fromEquirectangular(tex).texture;
+    tex.colorSpace = THREE.SRGBColorSpace; tex.mapping = THREE.EquirectangularReflectionMapping;
+    if (!skyMat) { skyMat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide });
+      scene.add(new THREE.Mesh(new THREE.SphereGeometry(20, 64, 32), skyMat)); }
+    else { skyMat.map?.dispose(); skyMat.map = tex; skyMat.needsUpdate = true; }
+    scene.environment = pmrem.fromEquirectangular(tex).texture;   // <-- room lights the stone
+    if (tex.image) { matchSun(tex.image); matchFloor(tex.image); } // aim sun + match floor colour to the room
   }, undefined, () => fail('Could not load room — generate one first.'));
 }
 
-// ---- stone + adaptive plinth ----
+// find the room's brightest direction and put the key light there -> stone self-shadows
+// consistently with the visible windows/sun (kills the "pasted-on" lighting mismatch).
+function matchSun(image) {
+  const w = 160, h = 80, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const x = cv.getContext('2d'); x.drawImage(image, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data;
+  let bi = 0, bv = -1;
+  for (let i = 0; i < w*h; i++) {
+    const lum = 0.299*d[i*4] + 0.587*d[i*4+1] + 0.114*d[i*4+2];
+    const row = (i / w) | 0;
+    const weight = lum * (1 - 0.45 * (row / h));      // prefer light from above
+    if (weight > bv) { bv = weight; bi = i; }
+  }
+  const u = (bi % w) / w, v = ((bi / w) | 0) / h;
+  const lon = u * 2 * Math.PI, lat = (0.5 - v) * Math.PI;
+  const dir = new THREE.Vector3(Math.cos(lat)*Math.sin(lon), Math.sin(lat), Math.cos(lat)*Math.cos(lon));
+  dir.y = Math.max(dir.y, 0.55); dir.normalize();
+  sun.position.copy(dir.multiplyScalar(6));
+  sun.color.set(0xfff1df); sun.intensity = 0.4;   // gentle — soft rooms want soft shadows
+  sun.shadow.radius = 14;
+}
+
+// ---- stone + adaptive plinth + grounding ----
 const loader = new GLTFLoader();
-let stoneGroup = null, ped = null;
+let group = null, reflGroup = null;
 function loadStone(id) {
-  const s = STONES[id]; if (!s) return;
-  current = id;
+  const s = STONES[id]; if (!s) return; current = id;
   document.getElementById('stone-name').textContent = s.name;
   document.getElementById('stone-dim').textContent = `${s.w}×${s.h}×${s.d} cm`;
   document.querySelectorAll('#stones .chip').forEach(c => c.classList.toggle('on', c.dataset.id === id));
 
-  const stoneH = s.h/100, stoneW = s.w/100, stoneD = s.d/100;
-  // museum-style: bring the stone's center to ~0.9 m; small stones get taller plinths
-  const pedH = Math.min(0.95, Math.max(0.30, 0.90 - stoneH/2));
-  const pedW = Math.max(0.22, stoneW * 1.25), pedD = Math.max(0.22, stoneD * 1.25);
-  const top = pedH + stoneH/2;
+  const sh = s.h/100, sw = s.w/100, sd = s.d/100;
+  const pedH = Math.min(0.95, Math.max(0.30, 0.92 - sh/2));
+  const pedW = Math.max(0.22, sw * 1.35), pedD = Math.max(0.22, sd * 1.35);
+  const top = pedH + sh/2;
 
-  if (ped) { scene.remove(ped); ped.geometry.dispose(); }
-  ped = new THREE.Mesh(
-    new RoundedBoxGeometry(pedW, pedH, pedD, 4, 0.02),
-    new THREE.MeshStandardMaterial({ color: 0xece7dd, roughness: 0.55, metalness: 0.0, envMapIntensity: 0.5 })
-  );
-  ped.position.set(0, pedH/2, 0); ped.castShadow = true; ped.receiveShadow = true;
-  scene.add(ped);
+  if (group) scene.remove(group);
+  if (reflGroup) scene.remove(reflGroup);
+  group = new THREE.Group();
 
-  if (stoneGroup) scene.remove(stoneGroup);
+  const ped = new THREE.Mesh(new RoundedBoxGeometry(pedW, pedH, pedD, 5, 0.018), plinthMat());
+  ped.position.set(0, pedH/2, 0); ped.castShadow = true; ped.receiveShadow = true; group.add(ped);
+  group.add(contactDecal(pedW*1.7, pedD*1.7, 0.004));              // pedestal grounded to floor
+
   loader.load(s.glb, (gltf) => {
-    const stone = gltf.scene;
-    let box = new THREE.Box3().setFromObject(stone);
-    const size = new THREE.Vector3(); box.getSize(size);
-    stone.scale.setScalar(stoneH / size.y);
-    box = new THREE.Box3().setFromObject(stone);
-    const c = new THREE.Vector3(); box.getCenter(c);
-    stone.position.x -= c.x; stone.position.z -= c.z;
-    stone.position.y -= box.min.y; stone.position.y += pedH;
-    stone.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-    stoneGroup = stone; scene.add(stone);
-  }, undefined, () => fail(`Could not load <b>${s.glb}</b> — generate it with gen-stone3d.mjs.`));
+    const st = gltf.scene;
+    let box = new THREE.Box3().setFromObject(st); const sz = new THREE.Vector3(); box.getSize(sz);
+    st.scale.setScalar(sh / sz.y);
+    box = new THREE.Box3().setFromObject(st); const c = new THREE.Vector3(); box.getCenter(c);
+    st.position.x -= c.x; st.position.z -= c.z; st.position.y -= box.min.y; st.position.y += pedH;
+    st.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true;
+      if (o.material) { o.material.envMapIntensity = 1.0; } } });
+    group.add(st);
+    group.add(contactDecal(sw*1.5, sd*1.5, pedH + 0.004));         // stone grounded to pedestal
 
-  // reframe camera
-  const rad = Math.max(1.4, stoneW * 2.6 + 1.0);
+    // faded mirror reflection in the floor -> the stand reads as standing IN the room
+    reflGroup = group.clone(true);
+    reflGroup.scale.set(1, -1, 1);
+    reflGroup.traverse(o => {
+      if (!o.isMesh) return;
+      if (o.name === 'decal') { o.visible = false; return; }
+      o.castShadow = false; o.receiveShadow = false;
+      o.material = o.material.clone();
+      o.material.transparent = true; o.material.opacity = 0.16;
+      o.material.depthWrite = false; o.material.side = THREE.DoubleSide;
+      o.renderOrder = -2;
+    });
+    scene.add(reflGroup);
+  }, undefined, () => fail(`Could not load <b>${s.glb}</b>.`));
+
+  scene.add(group);
+  const rad = Math.max(2.1, sw * 2.7 + 1.25);                      // further back
   controls.target.set(0, top, 0);
-  if (AZ !== null) camera.position.set(Math.sin(AZ)*rad, top + 0.25, Math.cos(AZ)*rad);
-  else camera.position.set(0, top + 0.25, rad);
+  if (AZ !== null) camera.position.set(Math.sin(AZ)*rad, top + 0.30, Math.cos(AZ)*rad);
+  else camera.position.set(rad*0.22, top + 0.30, rad);
   controls.update();
 }
 
-loadRoom('out/room.jpg');
-loadStone(current);
+// ---- depth of field: stone in focus, room softens naturally (kills the cut-out look) ----
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bokeh = new BokehPass(scene, camera, { focus: 3.0, aperture: 0.0009, maxblur: 0.006 });
+composer.addPass(bokeh);
+composer.addPass(new OutputPass());
 
+loadRoom('out/room.jpg'); loadStone(current);
 addEventListener('resize', () => {
   camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
 });
-renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+renderer.setAnimationLoop(() => {
+  controls.update();
+  bokeh.uniforms['focus'].value = camera.position.distanceTo(controls.target); // focus on the stone
+  composer.render();
+});
 
-// ---- UI: presets + stone picker ----
+// ---- UI ----
 const presets = [
   'a warm Scandinavian living room with light oak floor and big windows',
   'a moody industrial loft, concrete, black steel, dramatic side light',
@@ -202,24 +290,18 @@ const presets = [
 const pc = document.getElementById('presets');
 presets.forEach(p => { const el=document.createElement('span'); el.className='chip'; el.textContent=p.split(',')[0];
   el.onclick=()=>{ document.getElementById('prompt').value=p; }; pc.appendChild(el); });
-
 const sc = document.getElementById('stones');
-Object.entries(STONES).forEach(([id, s]) => { const el=document.createElement('span'); el.className='chip'; el.dataset.id=id;
+Object.entries(STONES).forEach(([id,s]) => { const el=document.createElement('span'); el.className='chip'; el.dataset.id=id;
   el.textContent=s.name; el.onclick=()=>loadStone(id); sc.appendChild(el); });
 
-const promptEl = document.getElementById('prompt');
-const goEl = document.getElementById('go');
-const statusEl = document.getElementById('status');
+const promptEl = document.getElementById('prompt'), goEl = document.getElementById('go'), statusEl = document.getElementById('status');
 goEl.onclick = async () => {
   const prompt = promptEl.value.trim(); if (!prompt) return;
-  goEl.disabled = true;
-  statusEl.innerHTML = '<span class="spin"></span>generating 360° room… ~15s';
-  try {
-    const r = await fetch('/api/room', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ prompt }) });
+  goEl.disabled = true; statusEl.innerHTML = '<span class="spin"></span>generating 360° room… ~15s';
+  try { const r = await fetch('/api/room', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ prompt }) });
     const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status);
     loadRoom(j.url); statusEl.textContent = 'done ✓ look around';
-  } catch (e) { statusEl.textContent = 'failed: ' + e.message; }
-  finally { goEl.disabled = false; }
+  } catch (e) { statusEl.textContent = 'failed: ' + e.message; } finally { goEl.disabled = false; }
 };
 </script>
 </body>
