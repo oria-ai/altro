@@ -1,1 +1,9 @@
-.vercel
+node_modules
+.playwright-cli/
+.vercel/
+.vercel.aurelius.bak/
+archive/
+.env*
+
+pipeline/batch-state.json
+pipeline/batch.log

@@ -4,29 +4,901 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Stones</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="favicon.ico" sizes="48x48" />
+  <link rel="icon" type="image/png" href="favicon.png" sizes="256x256" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <style>
+    :root { --c1:#9fb4c8; --c2:#d7e2ec; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; overflow-x: hidden; background: #06080b;
+      font-family: "Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing: antialiased; }
+
+    /* full-bleed cairn photo */
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background: #06080b url("bg.webp") center / cover no-repeat;
+      opacity: 0; transform: scale(1.06);
+      filter: brightness(0.62) saturate(0.95);
+      animation: bgIn 2.4s cubic-bezier(0.16,1,0.3,1) forwards,
+                 breathe 40s ease-in-out 2.4s infinite;
+    }
+    @keyframes bgIn { to { opacity: 1; transform: scale(1); } }
+    @keyframes breathe { 0%,100%{transform:scale(1);} 50%{transform:scale(1.035);} }
+
+    /* gentle vignette */
+    .vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      background: radial-gradient(ellipse at center,
+        rgba(6,8,11,0) 35%, rgba(6,8,11,0.72) 100%); }
+
+    .wrap { position: relative; z-index: 2; min-height: 100vh; width: 100%; display: flex;
+      flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 8vh 6vw; gap: clamp(1.4rem, 3vh, 2.4rem); }
+
+    .title { font-size: clamp(2.8rem, 9vw, 6.5rem); font-weight: 800;
+      letter-spacing: -0.03em; line-height: 1;
+      background: linear-gradient(120deg,#fff 30%,var(--c1) 70%,var(--c2) 95%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,.85)) drop-shadow(0 4px 22px rgba(0,0,0,.6));
+      opacity: 0; animation: rise 1.3s cubic-bezier(0.16,1,0.3,1) .4s forwards; }
+
+    .lead { font-size: clamp(.85rem,1.9vw,1.05rem); font-weight: 300;
+      letter-spacing: .04em; color: rgba(255,255,255,.9); max-width: 30rem;
+      text-shadow: 0 1px 3px rgba(0,0,0,.8);
+      opacity: 0; animation: rise 1.3s cubic-bezier(0.16,1,0.3,1) .7s forwards; }
+
+    /* stone cards (manifest-driven) */
+    .stones { display: flex; gap: clamp(1.4rem,4vw,2.6rem); flex-wrap: wrap;
+      justify-content: center; align-items: flex-start; }
+    .stone { opacity: 0; cursor: pointer; animation: rise 1.4s cubic-bezier(0.16,1,0.3,1) 1s forwards; }
+    .stone .size { margin-top:.3rem; font-size: clamp(.6rem,1.2vw,.7rem); font-weight:500;
+      letter-spacing:.18em; color: rgba(255,255,255,.55); text-transform:uppercase; }
+    .stone figure {
+      position: relative;
+      width: clamp(11rem, 24vw, 16rem); aspect-ratio: 1 / 1;
+      border-radius: 18px; overflow: hidden;
+      box-shadow: 0 18px 50px -12px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.08) inset;
+      transition: transform .6s cubic-bezier(0.16,1,0.3,1); }
+    .stone img { width: 100%; height: 100%; object-fit: cover; display: block;
+      transform: scale(1.01); transition: transform 8s ease-out; }
+    .stone:hover figure { transform: translateY(-4px); }
+    .stone:hover img { transform: scale(1.08); }
+    .stone figcaption { margin-top: .9rem; }
+    .stone .name { font-size: clamp(1rem,2.4vw,1.25rem); font-weight: 600;
+      color: rgba(255,255,255,.96); letter-spacing: .01em;
+      text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+    .stone .cap { margin-top: .35rem; font-size: clamp(.72rem,1.5vw,.85rem);
+      font-weight: 300; font-style: italic; color: rgba(255,255,255,.7);
+      text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+
+    .soon { display: flex; align-items: center; gap: 1rem; margin-top: clamp(1rem,3vh,2rem);
+      font-size: clamp(.7rem,1.4vw,.82rem); font-weight: 500;
+      letter-spacing: .55em; text-indent: .55em; text-transform: uppercase;
+      color: rgba(255,255,255,.9); text-shadow: 0 1px 3px rgba(0,0,0,.85); }
+    .soon::before, .soon::after { content: ""; display: block;
+      width: clamp(2rem,6vw,4rem); height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.4)); }
+    .soon::after { background: linear-gradient(90deg, rgba(255,255,255,.4), transparent); }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(26px); filter: blur(6px); }
+      to   { opacity: 1; transform: translateY(0);    filter: blur(0);   } }
+
+    /* ---- lightbox gallery ---- */
+    .lb { position: fixed; inset: 0; z-index: 10; display: none;
+      align-items: center; justify-content: center; flex-direction: column;
+      gap: clamp(.6rem,1.5vh,1rem); padding: 4vh 4vw;
+      background: rgba(4,6,9,0.9); backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px); }
+    .lb.open { display: flex; animation: lbIn .35s ease forwards; }
+    @keyframes lbIn { from{opacity:0} to{opacity:1} }
+    .lb-title { font-size: clamp(1.1rem,2.6vw,1.6rem); font-weight:700; letter-spacing:.01em;
+      color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8); }
+    .lb-name { font-size: clamp(.7rem,1.5vw,.82rem); font-weight:600; letter-spacing:.34em;
+      text-transform:uppercase; color:var(--c1); text-shadow:0 1px 3px rgba(0,0,0,.8); }
+    .lb-stage { position: relative; width: min(86vw, 60vh); aspect-ratio: 1/1;
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 24px 70px -18px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.08) inset; }
+    .lb-stage img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+      opacity:0; transition: opacity .4s ease; }
+    .lb-stage img.active { opacity:1; }
+    .lb-cap { min-height: 1.3em; font-size: clamp(.78rem,1.7vw,.92rem); font-weight:300;
+      font-style: italic; color: rgba(255,255,255,.82); text-align:center;
+      text-shadow:0 1px 3px rgba(0,0,0,.8); max-width: 32rem; }
+    .lb-nav { position:absolute; top:50%; transform:translateY(-50%);
+      width:44px; height:44px; border:0; border-radius:50%; cursor:pointer;
+      background: rgba(0,0,0,.45); color:#fff; font-size:1.4rem; line-height:1;
+      display:flex; align-items:center; justify-content:center;
+      transition: background .2s; user-select:none; z-index:2; }
+    .lb-nav:hover { background: rgba(0,0,0,.7); }
+    .lb-nav.prev { left:10px; } .lb-nav.next { right:10px; }
+    .lb-thumbs { display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; max-width:94vw; }
+    .lb-thumbs button { display:flex; flex-direction:column; align-items:center; gap:.35rem;
+      border:0; background:none; padding:0; cursor:pointer; opacity:.55;
+      transition:opacity .2s, transform .2s; }
+    .lb-thumbs button:hover { opacity:.85; }
+    .lb-thumbs button.on { opacity:1; transform:translateY(-2px); }
+    .lb-thumbs img { width:clamp(40px,8vw,58px); height:clamp(40px,8vw,58px); object-fit:cover;
+      border-radius:9px; display:block; box-shadow:0 0 0 1px rgba(255,255,255,.12) inset; }
+    .lb-thumbs button.on img { box-shadow:0 0 0 2px var(--c2); }
+    .lb-thumbs span { font-size:clamp(.52rem,1.1vw,.62rem); font-weight:600; letter-spacing:.05em;
+      text-transform:uppercase; color:rgba(255,255,255,.78); white-space:nowrap; }
+    .lb-close { position:fixed; top:18px; left:22px; right:auto; width:42px; height:42px; border:0;
+      border-radius:50%; background:rgba(0,0,0,.4); color:#fff; font-size:1.5rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; z-index:3; }
+    .lb-close:hover { background:rgba(0,0,0,.7); }
+
+    /* ---- offer ---- */
+    .lb-offer { display:flex; flex-direction:column; align-items:center; gap:.8rem;
+      width:min(86vw,30rem); }
+    .offer-btn { border:0; cursor:pointer; padding:.6rem 2.6rem; border-radius:999px;
+      font-size:clamp(.72rem,1.5vw,.84rem); font-weight:600; letter-spacing:.28em; text-transform:uppercase;
+      color:#06080b; background:linear-gradient(120deg,#fff,var(--c2) 70%,var(--c1));
+      box-shadow:0 6px 22px -6px rgba(0,0,0,.7); transition:transform .2s, box-shadow .2s; }
+    .offer-btn:hover { transform:translateY(-2px); box-shadow:0 10px 30px -8px rgba(0,0,0,.85); }
+    .offer-btn[hidden] { display:none; }
+    .offer-form { width:100%; display:flex; flex-direction:column; gap:.8rem;
+      animation:offerIn .35s cubic-bezier(0.16,1,0.3,1); }
+    .offer-form[hidden] { display:none; }
+    @keyframes offerIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .offer-row { display:flex; gap:.7rem; }
+    @media(max-width:480px){ .offer-row{flex-direction:column;} }
+    .offer-field { flex:1; display:flex; flex-direction:column; gap:.32rem; text-align:left; }
+    .offer-field > span { font-size:.6rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+      color:rgba(255,255,255,.6); padding-left:.2rem; }
+    .offer-field input { width:100%; padding:.62rem .8rem; border-radius:11px; font-family:inherit;
+      border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); color:#fff; font-size:.92rem;
+      outline:none; transition:border-color .2s, background .2s; }
+    .offer-field input::placeholder { color:rgba(255,255,255,.3); }
+    .offer-field input:focus { border-color:var(--c2); background:rgba(255,255,255,.1); }
+    .offer-price { position:relative; display:flex; align-items:center; }
+    .offer-price .k { position:absolute; right:.85rem; font-size:.9rem; font-weight:700; color:var(--c1);
+      pointer-events:none; }
+    .offer-price input { padding-right:2.7rem;
+      -moz-appearance:textfield; appearance:textfield; }
+    .offer-price input::-webkit-outer-spin-button,
+    .offer-price input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+    .offer-send { border:0; cursor:pointer; padding:.66rem; border-radius:11px; font-family:inherit;
+      font-size:.8rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#06080b;
+      background:linear-gradient(120deg,#fff,var(--c2)); transition:transform .15s, opacity .2s; }
+    .offer-send:hover { transform:translateY(-1px); }
+    .offer-send:disabled { opacity:.5; cursor:default; transform:none; }
+    .offer-msg { min-height:1em; font-size:.8rem; font-weight:300; line-height:1.4;
+      color:var(--c2); text-align:center; }
+    .offer-msg.err { color:#ff9d9d; }
+
+    /* ---- "Your Home" dream slide ---- */
+    .lb-thumbs button.dream-thumb img { filter: blur(4px) brightness(.6); transform: scale(.86); }
+    .dream-slide { position:absolute; inset:0; opacity:0; pointer-events:none;
+      transition:opacity .4s ease; display:flex; align-items:center; justify-content:center; }
+    .dream-slide.active { opacity:1; pointer-events:auto; }
+    .dream-slide .dream-bg { position:absolute; inset:0; width:100%; height:100%;
+      object-fit:cover; filter: blur(26px) brightness(.42) saturate(.85); transform:scale(1.15); }
+    .dream-panel { position:relative; z-index:1; width:min(88%,26rem); display:flex;
+      flex-direction:column; gap:.7rem; text-align:center; padding:1rem; }
+    .dream-soon { font-size:.62rem; font-weight:600; letter-spacing:.5em; text-indent:.5em;
+      text-transform:uppercase; color:rgba(255,255,255,.65); }
+    .dream-head { font-size:clamp(1rem,2.4vw,1.3rem); font-weight:700; color:#fff;
+      text-shadow:0 1px 4px rgba(0,0,0,.8); }
+    .dream-sub { font-size:clamp(.72rem,1.6vw,.84rem); font-weight:300; line-height:1.5;
+      color:rgba(255,255,255,.78); }
+    .dream-panel textarea { width:100%; min-height:4.6em; resize:none; padding:.7rem .85rem;
+      border-radius:12px; font-family:inherit; font-size:.9rem; line-height:1.45; color:#fff;
+      border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.07); outline:none;
+      transition:border-color .2s, background .2s; }
+    .dream-panel textarea::placeholder { color:rgba(255,255,255,.32); }
+    .dream-panel textarea:focus { border-color:var(--c2); background:rgba(255,255,255,.11); }
+    .dream-go { border:0; cursor:pointer; padding:.66rem 1.4rem; border-radius:999px;
+      font-family:inherit; font-size:.74rem; font-weight:600; letter-spacing:.22em;
+      text-transform:uppercase; color:#06080b;
+      background:linear-gradient(120deg,#fff,var(--c2) 70%,var(--c1));
+      box-shadow:0 6px 22px -6px rgba(0,0,0,.7); transition:transform .2s, opacity .2s; }
+    .dream-go:hover { transform:translateY(-2px); }
+    .dream-go:disabled { opacity:.55; cursor:default; transform:none; }
+    .dream-msg { min-height:1.3em; font-size:.78rem; font-weight:300; font-style:italic;
+      color:var(--c2); }
+    .dream-msg.err { color:#ff9d9d; font-style:normal; }
+
+    /* ---- cookie / local-storage notice (low banner) ---- */
+    .cookie-bar { position:fixed; left:50%; bottom:18px; z-index:60;
+      transform:translateX(-50%); display:flex; align-items:center; gap:16px;
+      max-width:min(640px,calc(100vw - 24px)); padding:13px 18px; border-radius:16px;
+      background:rgba(10,13,18,.92); border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 14px 50px -10px rgba(0,0,0,.7); backdrop-filter:blur(10px);
+      color:var(--c2); font-size:.82rem; line-height:1.5; font-weight:300;
+      opacity:0; translate:0 14px; transition:opacity .45s ease, translate .45s ease; }
+    .cookie-bar.show { opacity:1; translate:0 0; }
+    .cookie-bar b { font-weight:600; color:#fff; }
+    .cookie-bar .cookie-ok { flex:0 0 auto; border:0; cursor:pointer;
+      padding:.5rem 1.2rem; border-radius:999px; font-family:inherit; font-size:.7rem;
+      font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#06080b;
+      background:linear-gradient(120deg,#fff,var(--c2) 70%,var(--c1));
+      transition:transform .2s; }
+    .cookie-bar .cookie-ok:hover { transform:translateY(-2px); }
+    @media (max-width:480px){ .cookie-bar { flex-direction:column; text-align:center; gap:11px; bottom:12px; } }
+
+    /* while dreaming: the "working on" words overcome the explanation; the
+       visitor's prompt box blurs behind them */
+    .dream-slide.dreaming .dream-soon,
+    .dream-slide.dreaming .dream-head,
+    .dream-slide.dreaming .dream-sub,
+    .dream-slide.dreaming .dream-go { display:none; }
+    .dream-slide.dreaming textarea {
+      filter:blur(5px); opacity:.4; pointer-events:none; transform:scale(1.03);
+      transition:filter .5s ease, opacity .5s ease; }
+    .dream-slide.dreaming .dream-msg {
+      position:absolute; left:8%; right:8%; top:50%; transform:translateY(-50%);
+      min-height:0; font-size:clamp(1.1rem,3vw,1.55rem); font-weight:650; font-style:normal;
+      letter-spacing:.03em; color:#fff; text-shadow:0 2px 12px rgba(0,0,0,.9);
+      animation:dreamPulse 2.6s ease-in-out infinite; z-index:2; }
+    @keyframes dreamPulse { 0%,100%{opacity:1;} 50%{opacity:.5;} }
+    .dream-slide.dreaming .dream-email { position:absolute; left:50%; top:calc(50% + 4.2rem); transform:translateX(-50%);
+      width:min(86%,24rem); z-index:3; }
+
+    /* after a dream: the slide shows the room photo — click to re-enter */
+    .lb-stage img.dream-result { position:absolute; inset:0; width:100%; height:100%;
+      object-fit:cover; opacity:1; }
+    .dream-result[hidden], .dream-enter[hidden], .dream-again[hidden] { display:none; }
+    .dream-slide.has-result { cursor:pointer; }
+    .dream-slide.has-result .dream-panel { display:none; }
+    .dream-slide.has-result.dreaming .dream-panel { display:flex; position:relative; z-index:2;
+      background:rgba(4,6,9,.55); border-radius:14px; backdrop-filter:blur(4px); }
+    .dream-slide.has-result.dreaming .dream-enter,
+    .dream-slide.has-result.dreaming .dream-again { display:none; }
+    .dream-enter { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:3;
+      padding:.6rem 1.5rem; border-radius:999px; pointer-events:auto; cursor:pointer;
+      font-size:.7rem; font-weight:600; letter-spacing:.3em; text-indent:.3em; text-transform:uppercase;
+      color:#fff; background:rgba(0,0,0,.45); backdrop-filter:blur(6px);
+      border:1px solid rgba(255,255,255,.3); transition:opacity .3s; }
+    .dream-slide.has-result:hover .dream-enter { background:rgba(0,0,0,.7); }
+    .dream-again { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); z-index:1;
+      border:0; cursor:pointer; padding:.55rem 1.3rem; border-radius:999px; font-family:inherit;
+      font-size:.66rem; font-weight:600; letter-spacing:.22em; text-indent:.22em; text-transform:uppercase;
+      color:#06080b; background:linear-gradient(120deg,#fff,var(--c2) 70%,var(--c1));
+      box-shadow:0 6px 22px -6px rgba(0,0,0,.7); transition:transform .2s; }
+    .dream-again:hover { transform:translateX(-50%) translateY(-2px); }
+
+    /* email offer that appears mid-dream */
+    .dream-email { display:flex; flex-direction:column; gap:.5rem;
+      animation:offerIn .35s cubic-bezier(0.16,1,0.3,1); }
+    .dream-email[hidden] { display:none; }
+    .dream-email-hint { font-size:.72rem; font-weight:300; color:rgba(255,255,255,.65); }
+    .dream-email-row { display:flex; gap:.5rem; }
+    .dream-email-row input { flex:1; padding:.5rem .75rem; border-radius:10px; font-family:inherit;
+      font-size:.85rem; color:#fff; border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.07); outline:none; }
+    .dream-email-row input:focus { border-color:var(--c2); }
+    .dream-email-go { border:0; cursor:pointer; padding:.5rem 1rem; border-radius:10px;
+      font-family:inherit; font-size:.68rem; font-weight:600; letter-spacing:.12em;
+      text-transform:uppercase; color:#06080b; background:linear-gradient(120deg,#fff,var(--c2)); }
+
+    /* ---- info popup (original photo + height ruler) ---- */
+    .info-btn { position:absolute; top:9px; right:9px; z-index:4;
+      width:26px; height:26px; border-radius:50%; border:0; cursor:pointer;
+      font-family:Georgia,"Times New Roman",serif; font-style:italic; font-weight:700;
+      font-size:.92rem; line-height:1; color:#fff; background:rgba(0,0,0,.5);
+      backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 2px 8px rgba(0,0,0,.5); transition:background .2s, transform .2s; }
+    .info-btn:hover { background:rgba(0,0,0,.82); transform:scale(1.12); }
+    .lb-info { top:10px; right:10px; left:auto; }
+
+    .info { position:fixed; inset:0; z-index:20; display:none;
+      align-items:center; justify-content:center; padding:6vh 6vw;
+      background:rgba(4,6,9,.93); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+    .info.open { display:flex; animation:lbIn .3s ease forwards; }
+    .info-box { display:flex; flex-direction:column; align-items:center; gap:1.3rem; max-width:100%; }
+    .info-name { font-size:clamp(1.2rem,3vw,1.8rem); font-weight:700; color:#fff;
+      letter-spacing:.01em; text-shadow:0 1px 4px rgba(0,0,0,.8); }
+    .info-body { display:flex; align-items:stretch; gap:1.4rem;
+      height:min(62vh,520px); max-width:100%; }
+    .info-img { height:100%; width:auto; max-width:62vw; object-fit:contain;
+      border-radius:12px; box-shadow:0 24px 70px -18px rgba(0,0,0,.8),
+      0 0 0 1px rgba(255,255,255,.08) inset; display:block; }
+    .info-ruler { position:relative; width:60px; flex:0 0 auto;
+      border-left:2px solid rgba(255,255,255,.55); margin:.2rem 0 1.6rem; }
+    .info-ruler .tick { position:absolute; left:0; display:flex; align-items:center; gap:.45rem;
+      transform:translateY(50%); white-space:nowrap; }
+    .info-ruler .tick::before { content:""; display:block; width:8px; height:2px;
+      background:rgba(255,255,255,.55); }
+    .info-ruler .tick.major::before { width:15px; background:rgba(255,255,255,.85); }
+    .info-ruler .tick span { font-size:.62rem; font-weight:500; color:rgba(255,255,255,.7);
+      font-variant-numeric:tabular-nums; }
+    .info-ruler .tick.major span { font-size:.7rem; font-weight:700; color:#fff; }
+    .info-total { position:absolute; left:50%; bottom:calc(100% + .55rem); transform:translateX(-50%);
+      font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+      color:var(--c2); white-space:nowrap; }
+    .info-close { position:fixed; top:18px; right:22px; width:42px; height:42px; border:0;
+      border-radius:50%; background:rgba(0,0,0,.45); color:#fff; font-size:1.5rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; z-index:3; }
+    .info-close:hover { background:rgba(0,0,0,.75); }
+    @media(max-width:520px){ .info-body{ height:min(54vh,420px); gap:1rem; } .info-ruler{ width:46px; } }
+
+    /* ---- 360 panorama viewer ---- */
+    .pano { position:fixed; inset:0; z-index:30; display:none; background:#06080b; }
+    .pano.open { display:block; animation:lbIn .3s ease; }
+    .pano canvas { position:absolute; inset:0; width:100%; height:100%; display:block;
+      cursor:grab; touch-action:none; }
+    .pano canvas:active { cursor:grabbing; }
+    .pano-hint { position:absolute; bottom:26px; left:50%; transform:translateX(-50%);
+      font-size:.68rem; font-weight:500; letter-spacing:.32em; text-indent:.32em;
+      text-transform:uppercase; color:rgba(255,255,255,.55); pointer-events:none;
+      text-shadow:0 1px 3px rgba(0,0,0,.9); animation:hintFade 6s ease 2s forwards; }
+    @keyframes hintFade { to { opacity:0; } }
+    .pano-title { position:absolute; top:24px; left:50%; transform:translateX(-50%);
+      font-size:.72rem; font-weight:600; letter-spacing:.4em; text-indent:.4em;
+      text-transform:uppercase; color:rgba(255,255,255,.85); pointer-events:none;
+      text-shadow:0 1px 4px rgba(0,0,0,.9); }
+    .pano-close { position:absolute; top:18px; right:22px; width:42px; height:42px; border:0;
+      border-radius:50%; background:rgba(0,0,0,.45); color:#fff; font-size:1.5rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; z-index:2; }
+    .pano-close:hover { background:rgba(0,0,0,.75); }
+    .pano-share { position:absolute; top:18px; left:22px; height:42px; border:0; z-index:2;
+      border-radius:999px; background:rgba(0,0,0,.45); color:#fff; cursor:pointer; padding:0 1.1rem;
+      display:none; align-items:center; gap:.5rem; font:inherit; font-size:.82rem; font-weight:600; }
+    .pano-share.show { display:inline-flex; }
+    .pano-share:hover { background:rgba(0,0,0,.75); }
+    .pano-share svg { width:16px; height:16px; }
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <h1>Stones</h1>
-    <p class="tagline">A quiet collection. Click any stone to wander through its skies.</p>
-  </header>
+  <div class="bg"></div>
+  <div class="vignette"></div>
 
-  <main id="gallery" class="gallery" aria-label="Stone gallery"></main>
+  <main class="wrap">
+    <h1 class="title">Stones</h1>
+    <p class="lead">A quiet collection — each stone re-scened through its own skies.</p>
 
-  <div id="lightbox" class="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true">
-    <button class="lightbox-close" aria-label="Close">&times;</button>
-    <h2 id="lightboxTitle" class="lightbox-title"></h2>
+    <div class="stones" id="stoneCards"></div>
 
-    <div class="slider">
-      <button class="slider-nav prev" aria-label="Previous variant">&#10094;</button>
-      <div class="slider-track" id="sliderTrack"></div>
-      <button class="slider-nav next" aria-label="Next variant">&#10095;</button>
+    <div class="soon">more coming soon</div>
+  </main>
+
+  <div class="lb" id="lb" aria-modal="true" role="dialog">
+    <button class="lb-close" aria-label="Close" onclick="closeLB(event)">&times;</button>
+    <div class="lb-title" id="lbTitle"></div>
+    <div class="lb-name" id="lbName"></div>
+    <div class="lb-stage" id="lbStage">
+      <button class="info-btn lb-info" aria-label="Stone details" onclick="openInfo(activeStone,event)">i</button>
+      <div class="dream-slide" id="dreamSlide">
+        <img class="dream-bg" src="stones/flint/indoor.jpg" alt="" aria-hidden="true" />
+        <img class="dream-result" id="dreamResult" alt="Your room" hidden onclick="stepInside(event)" />
+        <div class="dream-enter" id="dreamEnter" hidden onclick="stepInside(event)">step inside &mdash; 360&deg;</div>
+        <button class="dream-again" id="dreamAgain" hidden onclick="regenDream(event)">&#8635;&nbsp;dream it again</button>
+        <div class="dream-panel">
+          <div class="dream-head">See it in your home</div>
+          <div class="dream-sub">Describe a room — and see this stone there, in full&nbsp;360&deg;.</div>
+          <textarea id="dreamDesc" maxlength="600" placeholder="Tall windows, soft afternoon light, a worn leather armchair&hellip;" onclick="event.stopPropagation()"></textarea>
+          <button class="dream-go" id="dreamGo" onclick="startDream(event)">Dream it &mdash; 360&deg;</button>
+          <div class="dream-msg" id="dreamMsg" role="status"></div>
+          <div class="dream-email" id="dreamEmail" hidden>
+            <div class="dream-email-hint">Takes about a minute &mdash; we can email it to you when it's ready.</div>
+            <div class="dream-email-row">
+              <input type="email" id="dreamEmailAddr" placeholder="you@example.com" onclick="event.stopPropagation()" />
+              <button class="dream-email-go" onclick="emailDream(event)">Email me</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="lb-nav prev" aria-label="Previous" onclick="lbGo(-1,event)">&#10094;</button>
+      <button class="lb-nav next" aria-label="Next" onclick="lbGo(1,event)">&#10095;</button>
     </div>
-
-    <div class="dots" id="sliderDots" aria-label="Variant selector"></div>
+    <div class="lb-cap" id="lbCap"></div>
+    <div class="lb-thumbs" id="lbThumbs"></div>
+    <div class="lb-offer">
+      <button class="offer-btn" id="offerToggle" onclick="toggleOffer(event)">Offer</button>
+      <form class="offer-form" id="offerForm" hidden onsubmit="submitOffer(event)">
+        <div class="offer-row">
+          <label class="offer-field">
+            <span>Your offer</span>
+            <div class="offer-price"><span class="k">k$</span>
+              <input type="number" id="offerPrice" min="0" step="0.5" inputmode="decimal" placeholder="0" required />
+            </div>
+          </label>
+          <label class="offer-field">
+            <span>Email</span>
+            <input type="email" id="offerEmail" placeholder="you@example.com" required />
+          </label>
+        </div>
+        <button type="submit" class="offer-send">Send offer</button>
+        <div class="offer-msg" id="offerMsg" role="status"></div>
+      </form>
+    </div>
   </div>
 
-  <script src="app.js" type="module"></script>
+  <div class="info" id="info" aria-modal="true" role="dialog" aria-label="Stone details">
+    <button class="info-close" aria-label="Close" onclick="closeInfo(event)">&times;</button>
+    <div class="info-box">
+      <div class="info-name" id="infoName"></div>
+      <div class="info-body">
+        <img class="info-img" id="infoImg" alt="" />
+        <div class="info-ruler" id="infoRuler"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pano" id="pano" aria-modal="true" role="dialog" aria-label="360 view of the stone in your home">
+    <div class="pano-title">your home &mdash; 360&deg;</div>
+    <button class="pano-share" id="panoShare" aria-label="Share this 360 view" onclick="sharePano(event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
+      <span id="panoShareLabel">Share</span></button>
+    <button class="pano-close" aria-label="Close 360 view" onclick="closePano()">&times;</button>
+    <div class="pano-hint">drag to look around</div>
+  </div>
+
+  <div class="cookie-bar" id="cookieBar" hidden>
+    <span>We keep <b>your dreams</b> on this device so they're waiting for you when you come back &mdash; nothing leaves your browser.</span>
+    <button class="cookie-ok" id="cookieOk">Got it</button>
+  </div>
+
+  <script>
+    const VLABEL = { blur:"Sophisticated Blur", outdoor:"Outdoor", indoor:"Indoor", creative:"Creative" };
+    const lb=document.getElementById('lb'), stage=document.getElementById('lbStage'),
+          cap=document.getElementById('lbCap'), nameEl=document.getElementById('lbName'),
+          thumbs=document.getElementById('lbThumbs'), dreamSlide=document.getElementById('dreamSlide');
+    let STONES=[], activeStone=null, slides=[], idx=0, els=[];
+
+    function sizeLabel(d){
+      if(!d) return "";
+      const pick=[['width_cm','wide'],['height_cm','tall'],['depth_cm','deep']].find(([k])=>d[k]>0);
+      if(!pick) return "";
+      const v=d[pick[0]];
+      return (v>=100 ? (v/100).toFixed(1).replace(/\.0$/,'')+" m" : v+" cm") + " " + pick[1];
+    }
+    function heroSrc(s){
+      return (s.looks&&s.looks[0]&&s.looks[0].src)
+        || (typeof s.original==='string'?s.original:(s.original&&s.original.src)) || '';
+    }
+    function dreamBg(s){
+      const ind=(s.looks||[]).find(l=>l.kind==='indoor');
+      return (ind&&ind.src) || heroSrc(s);
+    }
+    function slidesFor(s){
+      const out=(s.looks||[]).map(v=>({src:v.src,name:v.name||VLABEL[v.kind]||'Look',cap:v.caption||""}));
+      out.push({dream:true,src:dreamBg(s),name:"Your Home",cap:"See it in your home — describe a room."});
+      return out;
+    }
+    function renderCards(){
+      const host=document.getElementById('stoneCards');
+      host.innerHTML='';
+      STONES.forEach((s,i)=>{
+        const card=document.createElement('div');
+        card.className='stone'; card.style.animationDelay=(1+i*.25)+'s';
+        card.setAttribute('role','button'); card.tabIndex=0;
+        card.setAttribute('aria-label','Open '+s.name+' gallery');
+        card.innerHTML='<figure><img src="'+heroSrc(s)+'" alt="'+s.name+'">'+
+          '<button class="info-btn" aria-label="Info about '+s.name+'">i</button></figure>'+
+          '<figcaption><div class="name">'+s.name+'</div>'+
+          '<div class="size">'+sizeLabel(s.dimensions)+'</div>'+
+          '<div class="cap">'+((s.looks&&s.looks[0]&&s.looks[0].caption)||'')+'</div></figcaption>';
+        card.onclick=()=>openLB(s);
+        card.onkeydown=(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openLB(s); } };
+        const ib=card.querySelector('.info-btn');
+        if(ib) ib.onclick=(e)=>{ e.stopPropagation(); openInfo(s); };
+        host.appendChild(card);
+      });
+    }
+    function buildLB(s){
+      slides=slidesFor(s);
+      els.forEach(el=>{ if(el!==dreamSlide) el.remove(); });
+      els=[]; thumbs.innerHTML='';
+      document.getElementById('lbTitle').textContent=s.name;
+      dreamSlide.querySelector('.dream-bg').src=dreamBg(s);
+      renderDreamResult();
+      slides.forEach((v,i)=>{
+        if(v.dream){ els.push(dreamSlide); }
+        else {
+          const im=document.createElement('img'); im.src=v.src; im.alt=s.name+' — '+v.name; im.loading='lazy';
+          stage.insertBefore(im, stage.querySelector('.lb-nav.next')); els.push(im);
+        }
+        const b=document.createElement('button'); b.setAttribute('aria-label',v.name);
+        if(v.dream) b.classList.add('dream-thumb');
+        b.innerHTML='<img src="'+v.src+'" alt=""><span>'+v.name+'</span>';
+        b.onclick=(e)=>{ e.stopPropagation(); show(i); }; thumbs.appendChild(b);
+      });
+    }
+    function show(i){ idx=(i+slides.length)%slides.length;
+      els.forEach((im,k)=>im.classList.toggle('active',k===idx));
+      [...thumbs.children].forEach((b,k)=>b.classList.toggle('on',k===idx));
+      nameEl.textContent=slides[idx].name; cap.textContent=slides[idx].cap; }
+    function openLB(s){ activeStone=s; buildLB(s); lb.classList.add('open'); show(0); resetOffer();
+      document.addEventListener('keydown',lbKey); restoreDream(s); }
+    function closeLB(e){ if(e) e.stopPropagation(); lb.classList.remove('open'); document.removeEventListener('keydown',lbKey); }
+
+    // ---- info popup: original photo + a height ruler to its right ----
+    function fmtCm(v){ return v>=100 ? (+(v/100).toFixed(2))+' m' : v+' cm'; }
+    function buildRuler(h){
+      if(!(h>0)) return '';
+      const step = h<=16?2 : h<=40?5 : h<=100?10 : h<=300?25 : 50;
+      let html='<div class="info-total">'+fmtCm(h)+' tall</div>';
+      let last=0;
+      for(let v=0; v<=h+1e-6; v+=step){
+        const major = v % (step*2) === 0;
+        html+='<div class="tick'+(major?' major':'')+'" style="bottom:'+(v/h*100)+'%"><span>'+v+'</span></div>';
+        last=v;
+      }
+      // top tick at the exact height, if the step grid didn't already land there
+      if(Math.abs(last-h)>1e-6){
+        const top=Number.isInteger(h)?h:+h.toFixed(1);
+        html+='<div class="tick major" style="bottom:100%"><span>'+top+'</span></div>';
+      }
+      return html;
+    }
+    function openInfo(s,e){
+      if(e) e.stopPropagation();
+      if(!s) return;
+      document.getElementById('infoName').textContent=s.name||'';
+      const img=document.getElementById('infoImg');
+      const osrc=(typeof s.original==='string'?s.original:(s.original&&s.original.src))||heroSrc(s)||'';
+      img.src=osrc;
+      img.alt=(s.name||'Stone')+' — original';
+      const h=(s.dimensions&&s.dimensions.height_cm>0)?s.dimensions.height_cm:0;
+      const ruler=document.getElementById('infoRuler');
+      if(h>0){ ruler.style.display='block'; ruler.innerHTML=buildRuler(h); }
+      else { ruler.style.display='none'; ruler.innerHTML=''; }
+      document.getElementById('info').classList.add('open');
+      document.addEventListener('keydown',infoKey,true);
+    }
+    function closeInfo(e){ if(e) e.stopPropagation();
+      document.getElementById('info').classList.remove('open');
+      document.removeEventListener('keydown',infoKey,true); }
+    function infoKey(e){ if(e.key==='Escape'){ e.stopImmediatePropagation(); e.stopPropagation(); closeInfo(); } }
+    document.getElementById('info').addEventListener('click',e=>{ if(e.target.id==='info') closeInfo(); });
+    window.openInfo=openInfo; window.closeInfo=closeInfo;
+
+    // DB-backed source of truth; manifest is the fallback
+    fetch('/api/stones').then(r=>r.ok?r.json():Promise.reject())
+      .then(d=>{ STONES=d.stones||[]; renderCards(); })
+      .catch(()=>fetch('stones/manifest.json').then(r=>r.ok?r.json():[]).catch(()=>[])
+        .then(d=>{ STONES=d; renderCards(); }));
+
+    // ---- offer ----
+    function toggleOffer(e){ if(e) e.stopPropagation();
+      document.getElementById('offerToggle').hidden = true;
+      document.getElementById('offerForm').hidden = false;
+      document.getElementById('offerPrice').focus(); }
+    function resetOffer(){
+      const t=document.getElementById('offerToggle'), f=document.getElementById('offerForm'),
+            m=document.getElementById('offerMsg');
+      if(!t||!f) return;
+      t.hidden=false; f.hidden=true; f.reset();
+      f.querySelector('.offer-send').disabled=false;
+      m.textContent=''; m.className='offer-msg'; }
+    async function submitOffer(e){ e.preventDefault();
+      const price=parseFloat(document.getElementById('offerPrice').value),
+            email=document.getElementById('offerEmail').value.trim(),
+            m=document.getElementById('offerMsg'),
+            send=document.getElementById('offerForm').querySelector('.offer-send');
+      if(!(price>0)){ m.textContent='Enter an offer above 0.'; m.className='offer-msg err'; return; }
+      const usd=(price*1000).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+      send.disabled=true; m.className='offer-msg'; m.textContent='Sending…';
+      try{
+        const r=await fetch('/api/offer',{ method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ stone:activeStone.id, amount_usd:price*1000, email }) });
+        if(!r.ok){ const d=await r.json().catch(()=>({})); throw new Error(d.error||'Could not record the offer.'); }
+        m.textContent='Thank you — your offer of '+usd+' for '+activeStone.name+' is in. We’ll be in touch at '+email+'.';
+        setTimeout(resetOffer, 3500);
+      }catch(err){
+        m.textContent=err.message; m.className='offer-msg err'; send.disabled=false;
+      } }
+    function lbGo(d,e){ if(e) e.stopPropagation(); show(idx+d); }
+    function lbKey(e){
+      if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+      if(document.getElementById('pano').classList.contains('open')) return;
+      if(e.key==='Escape')closeLB(); else if(e.key==='ArrowRight')lbGo(1); else if(e.key==='ArrowLeft')lbGo(-1); }
+    lb.addEventListener('click', e=>{ if(e.target===lb) closeLB(); });
+
+    // ---- deep link: ?dream=<id> opens the saved pano directly ----
+    const dreamParam=new URLSearchParams(location.search).get('dream');
+    if(dreamParam){
+      fetch('/api/dream?id='+encodeURIComponent(dreamParam))
+        .then(r=>r.ok?r.json():Promise.reject())
+        .then(d=>{ if(!d||!d.image) return Promise.reject(); activeStone=null; return openPano(d.image, dreamParam); })
+        .catch(()=>{ alert('Could not open this 360 view. Please refresh and try again.'); });
+    }
+
+    // ---- dream: describe your home → Gemini 360 panorama ----
+    const DREAM_LINES = ["Reading your words…","Raising the walls…","Pouring the light…",
+                         "Placing the stone…","Stitching the horizon…","Almost there…"];
+    let dreaming=false, emailCapable=null, emailTimer=null, pendingEmail=null;
+    // probe email capability once on load
+    fetch('/api/dream').then(r=>r.json()).then(c=>{ emailCapable=!!c.emailDelivery; }).catch(()=>{ emailCapable=false; });
+
+    // stoneId → { blob?, url, desc, dreamId }
+    const dreamResults={};
+
+    // ---- per-browser dream persistence ----------------------------------
+    // The dream itself lives on the server (DB row + R2 image). The browser
+    // only remembers which dream is "yours" for each stone, so a refresh can
+    // pull it back instead of losing it.
+    const DREAMS_KEY='shay_dreams_v1';
+    function savedDreams(){ try{ return JSON.parse(localStorage.getItem(DREAMS_KEY)||'{}'); }catch(_){ return {}; } }
+    function writeDreams(m){ try{ localStorage.setItem(DREAMS_KEY, JSON.stringify(m)); }catch(_){} }
+    function rememberDream(stoneId,dreamId,desc){ if(!stoneId||!dreamId) return;
+      const m=savedDreams(); m[stoneId]={ dreamId, desc:desc||'', ts:Date.now() }; writeDreams(m); }
+    function forgetDream(stoneId){ const m=savedDreams(); if(m[stoneId]){ delete m[stoneId]; writeDreams(m); } }
+    // On opening a stone, if it has a saved dream we don't already hold in
+    // memory, fetch its server-side image and re-populate the result slide.
+    async function restoreDream(s){
+      if(!s || dreamResults[s.id]) return;
+      const saved=savedDreams()[s.id]; if(!saved||!saved.dreamId) return;
+      try{
+        const d=await fetch('/api/dream?id='+encodeURIComponent(saved.dreamId)).then(r=>r.ok?r.json():null);
+        if(!d||!d.image){ forgetDream(s.id); return; }   // gone server-side → drop the stale pointer
+        dreamResults[s.id]={ url:d.image, desc:d.description||saved.desc||'', dreamId:saved.dreamId };
+        if(activeStone&&activeStone.id===s.id) renderDreamResult();
+      }catch(_){}
+    }
+
+    function renderDreamResult(){
+      const r=activeStone&&dreamResults[activeStone.id];
+      dreamSlide.classList.toggle('has-result',!!r);
+      document.getElementById('dreamResult').hidden=!r;
+      document.getElementById('dreamEnter').hidden=!r;
+      document.getElementById('dreamAgain').hidden=!r;
+      const tb=thumbs.querySelector('.dream-thumb img');
+      if(r){
+        document.getElementById('dreamResult').src=r.url;
+        if(tb) tb.src=r.url;
+      } else if(tb&&activeStone){
+        tb.src=dreamBg(activeStone);
+      }
+    }
+
+    // "step inside" — direct, reliable re-entry (don't rely on click-bubbling
+    // through the result image, which silently swallowed the click).
+    function stepInside(e){
+      if(e) e.stopPropagation();
+      if(dreaming) return;
+      const r=activeStone&&dreamResults[activeStone.id];
+      if(!r) return;
+      const de=document.getElementById('dreamEnter');
+      const label=de.innerHTML;
+      openPano(r.url, r.dreamId).catch(err=>{
+        console.error('step inside failed:', err);
+        de.textContent='couldn’t open — tap to retry';
+        setTimeout(()=>{ de.innerHTML=label; }, 2600);
+      });
+    }
+    window.stepInside=stepInside;
+
+    // clicking a result slide re-enters the pano
+    dreamSlide.addEventListener('click',(e)=>{
+      if(!dreamSlide.classList.contains('has-result')||dreaming) return;
+      if(e.target.closest('.dream-again')||e.target.closest('.dream-email')) return;
+      e.stopPropagation();
+      const r=activeStone&&dreamResults[activeStone.id];
+      if(r) openPano(r.url, r.dreamId).catch(err=>{
+        const msg=document.getElementById('dreamMsg');
+        msg.textContent=err.message||'Could not open the 360 view — please try again.';
+        msg.className='dream-msg err';
+      });
+    });
+
+    function regenDream(e){
+      if(e) e.stopPropagation();
+      if(dreaming) return;
+      const r=activeStone&&dreamResults[activeStone.id];
+      if(r){ if(r.url&&r.url.indexOf('blob:')===0) URL.revokeObjectURL(r.url); delete dreamResults[activeStone.id]; }
+      if(activeStone) forgetDream(activeStone.id);
+      document.getElementById('dreamDesc').value='';
+      document.getElementById('dreamMsg').textContent='';
+      document.getElementById('dreamMsg').className='dream-msg';
+      document.getElementById('dreamEmail').hidden=true;
+      renderDreamResult();
+    }
+
+    async function emailDream(e){
+      if(e) e.stopPropagation();
+      const box=document.getElementById('dreamEmail'),
+            addr=document.getElementById('dreamEmailAddr').value.trim(),
+            hint=box.querySelector('.dream-email-hint'),
+            go=box.querySelector('.dream-email-go');
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr)){
+        if(hint){ hint.textContent='Enter a valid email and we’ll send it over.'; hint.style.color='#ff9d9d'; }
+        document.getElementById('dreamEmailAddr').focus();
+        return;                          // was: silent return → looked like "nothing happens"
+      }
+      const r=activeStone&&dreamResults[activeStone.id];
+      const dreamId=r&&r.dreamId;
+      if(go){ go.disabled=true; go.textContent='…'; }   // immediate feedback
+      if(!dreamId){
+        // dream still rendering — capture the address; startDream emails it the
+        // moment the id lands (no wasteful second generation).
+        pendingEmail=addr;
+        box.innerHTML='<div class="dream-email-hint">Perfect — we’ll email it the moment it’s ready. You can close this and go.</div>';
+        return;
+      }
+      try{
+        const resp=await fetch('/api/dream',{ method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ emailExisting:dreamId, email:addr }) });
+        const d=await resp.json().catch(()=>({}));
+        box.innerHTML='<div class="dream-email-hint">'+
+          (resp.ok ? 'On its way — check your inbox in a minute or two.'
+                   : (d.error||'Email delivery is unavailable right now.'))+'</div>';
+      }catch(_){
+        box.innerHTML='<div class="dream-email-hint">Email delivery is unavailable right now.</div>';
+      }
+    }
+
+    async function startDream(e){
+      if(e) e.stopPropagation();
+      if(dreaming) return;
+      const desc=document.getElementById('dreamDesc').value.trim(),
+            msg=document.getElementById('dreamMsg'), go=document.getElementById('dreamGo');
+      if(desc.length<3){ msg.textContent='Tell us a little more about your home.'; msg.className='dream-msg err'; return; }
+      dreaming=true; go.disabled=true; msg.className='dream-msg'; dreamSlide.classList.add('dreaming');
+      let li=0; msg.textContent=DREAM_LINES[0];
+      const ticker=setInterval(()=>{ msg.textContent=DREAM_LINES[++li%DREAM_LINES.length]; }, 4000);
+      // after 3s of dreaming, offer email delivery (if the backend can send)
+      emailTimer=setTimeout(()=>{ if(dreaming && emailCapable) document.getElementById('dreamEmail').hidden=false; }, 3000);
+      try{
+        const r=await fetch('/api/dream',{ method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ stone:activeStone?activeStone.id:'flint', description:desc }) });
+        if(!r.ok){
+          let m='The dream engine is unavailable right now.';
+          try{ m=(await r.json()).error || m; }catch(_){}
+          throw new Error(m);
+        }
+        const blob=await r.blob();
+        const dreamId=r.headers.get('x-dream-id')||null;
+        clearInterval(ticker); clearTimeout(emailTimer); msg.textContent='';
+        document.getElementById('dreamEmail').hidden=true;
+        const old=activeStone&&dreamResults[activeStone.id];
+        if(old&&old.url&&old.url.indexOf('blob:')===0) URL.revokeObjectURL(old.url);
+        const objUrl=URL.createObjectURL(blob);
+        if(activeStone){ dreamResults[activeStone.id]={ blob, desc, url:objUrl, dreamId };
+          if(dreamId) rememberDream(activeStone.id, dreamId, desc); }
+        // if the visitor asked to be emailed while it rendered, send it now (one generation, real email)
+        if(pendingEmail && dreamId){
+          fetch('/api/dream',{ method:'POST', headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ emailExisting:dreamId, email:pendingEmail }) }).catch(()=>{});
+          pendingEmail=null;
+        }
+        renderDreamResult();
+        await openPano(objUrl, dreamId);
+      }catch(err){
+        clearInterval(ticker); clearTimeout(emailTimer); pendingEmail=null;
+        msg.textContent=err.message||'Something went wrong — try again.';
+        msg.className='dream-msg err';
+      }finally{ dreaming=false; go.disabled=false; dreamSlide.classList.remove('dreaming'); show(idx); }
+    }
+
+    // ---- 360 viewer (Three.js, lazy-loaded) ----
+    const pano=document.getElementById('pano');
+    let three=null, panoState=null;
+    // UMD builds of three were deprecated at r150 and the legacy build/three.min.js
+    // path can disappear from a CDN without warning — which would silently kill
+    // "step inside". So we SELF-HOST the maintained three@0.149.0 UMD build in
+    // /vendor and load it FIRST — zero third-party-CDN dependency for the happy
+    // path. The CDN chain (jsdelivr → unpkg → legacy r160) stays only as a
+    // last-resort fallback in case the vendored file is somehow blocked/missing.
+    // Never cache a *rejected* promise: a one-off network blip must not
+    // permanently break the viewer.
+    const THREE_SOURCES=[
+      '/vendor/three.min.js',
+      'https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js',
+      'https://unpkg.com/three@0.149.0/build/three.min.js',
+      'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js',
+    ];
+    function loadScript(src){
+      return new Promise((ok,fail)=>{
+        const s=document.createElement('script');
+        s.src=src; s.async=true;
+        s.onload=()=>window.THREE?ok():fail(new Error('loaded but no THREE'));
+        s.onerror=()=>fail(new Error('Could not load '+src));
+        document.head.appendChild(s);
+      });
+    }
+    function loadThree(){
+      if(window.THREE) return Promise.resolve();
+      if(three) return three;
+      three=(async()=>{
+        let lastErr;
+        for(const src of THREE_SOURCES){
+          try{ await loadScript(src); if(window.THREE) return; }
+          catch(e){ lastErr=e; }
+        }
+        three=null; // clear cache so a later click can retry from scratch
+        throw lastErr||new Error('Could not load the 360 viewer.');
+      })();
+      return three;
+    }
+    let panoShareId=null;
+    // src is a URL string: a same-origin object URL (a freshly generated dream)
+    // or the cross-origin cdn URL of a saved dream — R2 CORS now permits the
+    // WebGL texture load either way.
+    async function openPano(src, shareId){
+      panoShareId = shareId || null;
+      const shareBtn=document.getElementById('panoShare');
+      shareBtn.classList.toggle('show', !!panoShareId);
+      document.getElementById('panoShareLabel').textContent='Share';
+      await loadThree();
+      // For cross-origin cdn images the WebGL texture load requires CORS. A
+      // stable cache-bust gives a fresh Cloudflare cache key that always carries
+      // the Access-Control-Allow-Origin header (avoids pre-CORS poisoned entries).
+      const url = /^https?:/.test(src) ? src + (src.indexOf('?')<0?'?':'&') + 'v=2' : src;
+      const loader=new THREE.TextureLoader(); loader.setCrossOrigin('anonymous');
+      const tex=await new Promise((ok,fail)=>{
+        loader.load(url, t=>{ t.colorSpace=THREE.SRGBColorSpace; ok(t); },
+          undefined, ()=>fail(new Error('Could not read the panorama.')));
+      });
+      const img=tex.image, coverage=Math.min(1, (2*img.height)/img.width);
+      const renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+      renderer.setSize(innerWidth,innerHeight);
+      pano.insertBefore(renderer.domElement, pano.firstChild);
+      const scene=new THREE.Scene(); scene.background=new THREE.Color(0x06080b);
+      const cam=new THREE.PerspectiveCamera(75, innerWidth/innerHeight, .1, 100);
+      const geo=new THREE.SphereGeometry(50, 64, 48,
+        0, Math.PI*2, Math.PI*(1-coverage)/2, Math.PI*coverage);
+      geo.scale(-1,1,1);
+      scene.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({map:tex})));
+      const maxLat=Math.max(15, coverage*85);
+      let lon=180, lat=0, vlon=0, vlat=0, drag=null, raf=0;
+      function frame(){
+        raf=requestAnimationFrame(frame);
+        if(!drag){ lon+=vlon; lat+=vlat; vlon*=.93; vlat*=.93; }
+        lat=Math.max(-maxLat,Math.min(maxLat,lat));
+        const phi=THREE.MathUtils.degToRad(90-lat), theta=THREE.MathUtils.degToRad(lon);
+        cam.lookAt(Math.sin(phi)*Math.cos(theta), Math.cos(phi), Math.sin(phi)*Math.sin(theta));
+        renderer.render(scene,cam);
+      }
+      const el=renderer.domElement;
+      const down=(x,y)=>{ drag={x,y,lon,lat}; vlon=vlat=0; };
+      const move=(x,y)=>{ if(!drag) return;
+        const nl=drag.lon+(drag.x-x)*.18, nt=drag.lat+(y-drag.y)*.18;
+        vlon=nl-lon; vlat=nt-lat; lon=nl; lat=nt; };
+      el.addEventListener('pointerdown',e=>{ el.setPointerCapture(e.pointerId); down(e.clientX,e.clientY); });
+      el.addEventListener('pointermove',e=>move(e.clientX,e.clientY));
+      el.addEventListener('pointerup',()=>{ drag=null; });
+      el.addEventListener('wheel',e=>{ e.preventDefault();
+        cam.fov=Math.max(40,Math.min(95,cam.fov+e.deltaY*.04)); cam.updateProjectionMatrix(); },{passive:false});
+      const onResize=()=>{ cam.aspect=innerWidth/innerHeight; cam.updateProjectionMatrix();
+        renderer.setSize(innerWidth,innerHeight); };
+      addEventListener('resize',onResize);
+      // Note: we don't revokeObjectURL(url) here — for fresh dreams the object
+      // URL is shared with the result thumbnail and must outlive the viewer.
+      panoState={ destroy(){ cancelAnimationFrame(raf); removeEventListener('resize',onResize);
+        renderer.dispose(); tex.dispose(); geo.dispose(); el.remove(); } };
+      pano.classList.add('open'); frame();
+    }
+    function closePano(){
+      pano.classList.remove('open');
+      if(panoState){ panoState.destroy(); panoState=null; }
+    }
+    async function sharePano(e){
+      if(e) e.stopPropagation();
+      if(!panoShareId) return;
+      const url=location.origin+'/?dream='+encodeURIComponent(panoShareId);
+      const lbl=document.getElementById('panoShareLabel');
+      if(navigator.share){
+        try{ await navigator.share({ title:'A stone in your home — 360°',
+          text:'See this stone in a room, in full 360°.', url }); return; }
+        catch(_){ return; } // user dismissed the share sheet
+      }
+      try{ await navigator.clipboard.writeText(url); lbl.textContent='Link copied'; setTimeout(()=>{ lbl.textContent='Share'; },2000); }
+      catch(_){ prompt('Copy this 360 link:', url); }
+    }
+    window.sharePano=sharePano;
+    document.addEventListener('keydown', e=>{
+      if(e.key==='Escape' && pano.classList.contains('open')){ e.stopPropagation(); closePano(); }
+    }, true);
+
+    // ---- cookie / local-storage notice ----
+    (function(){
+      const KEY='shay_consent', bar=document.getElementById('cookieBar');
+      if(!bar) return;
+      let acked=true; try{ acked=localStorage.getItem(KEY)==='1'; }catch(_){ acked=true; }
+      if(acked) return;                       // already acknowledged (or storage blocked)
+      bar.hidden=false; requestAnimationFrame(()=>bar.classList.add('show'));
+      document.getElementById('cookieOk').onclick=()=>{
+        try{ localStorage.setItem(KEY,'1'); }catch(_){}
+        bar.classList.remove('show'); setTimeout(()=>{ bar.hidden=true; }, 450);
+      };
+    })();
+  </script>
 </body>
 </html>

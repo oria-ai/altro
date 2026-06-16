@@ -1,0 +1,32 @@
+{
+  "functions": {
+    "api/dream.js": {
+      "maxDuration": 120
+    },
+    "api/admin.js": {
+      "maxDuration": 120
+    },
+    "api/world.js": {
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/stones",
+      "schedule": "0 6 * * *"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.shaym.beauty"
+        }
+      ],
+      "destination": "/admin.html",
+      "permanent": false
+    }
+  ]
+}
