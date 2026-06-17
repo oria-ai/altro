@@ -340,6 +340,11 @@
     .pano-share.show { display:inline-flex; }
     .pano-share:hover { background:rgba(0,0,0,.75); }
     .pano-share svg { width:16px; height:16px; }
+    .site-foot { text-align:center; padding:2.2rem 1rem 3rem; }
+    .site-foot a { color:var(--c1); opacity:.7; font-size:.74rem; letter-spacing:.08em; text-decoration:none; }
+    .site-foot a:hover { opacity:1; }
+    .form-consent { font-size:.66rem; line-height:1.4; color:rgba(255,255,255,.42); text-align:center; }
+    .form-consent a { color:var(--c1); }
 </style>
 </head>
 <body>
@@ -353,6 +358,7 @@
     <div class="stones" id="stoneCards"></div>
 
     <div class="soon">more coming soon</div>
+    <footer class="site-foot"><a href="/privacy.html">Privacy Policy</a></footer>
   </main>
 
   <div class="lb" id="lb" aria-modal="true" role="dialog">
@@ -378,6 +384,7 @@
               <input type="email" id="dreamEmailAddr" placeholder="you@example.com" onclick="event.stopPropagation()" />
               <button class="dream-email-go" onclick="emailDream(event)">Email me</button>
             </div>
+            <div class="form-consent">By submitting, you agree to our <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</div>
           </div>
         </div>
       </div>
@@ -402,6 +409,7 @@
           </label>
         </div>
         <button type="submit" class="offer-send">Send offer</button>
+        <div class="form-consent">By submitting, you agree to our <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</div>
         <div class="offer-msg" id="offerMsg" role="status"></div>
       </form>
     </div>
