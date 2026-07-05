@@ -279,8 +279,8 @@
    "character": "",
    "status": "available",
    "dimensions": {
-    "height_cm": 22,
-    "approx": true
+    "height_cm": 80,
+    "approx": false
    },
    "top_offer_usd": null,
    "thumb": "https://cdn.shaym.beauty/stone-vhdw/blur-sm.jpg",
@@ -293,19 +293,19 @@
      "caption": ""
     },
     {
-     "src": "https://cdn.shaym.beauty/stone-vhdw/outdoor.jpg",
+     "src": "https://cdn.shaym.beauty/stone-vhdw/outdoor-lg.jpg",
      "kind": "outdoor",
      "name": "Outdoor",
      "caption": ""
     },
     {
-     "src": "https://cdn.shaym.beauty/stone-vhdw/indoor.jpg",
+     "src": "https://cdn.shaym.beauty/stone-vhdw/indoor-lg.jpg",
      "kind": "indoor",
      "name": "Indoor",
      "caption": ""
     },
     {
-     "src": "https://cdn.shaym.beauty/stone-vhdw/creative.jpg",
+     "src": "https://cdn.shaym.beauty/stone-vhdw/creative-lg.jpg",
      "kind": "creative",
      "name": "Creative",
      "caption": ""
@@ -1151,19 +1151,19 @@
      "caption": ""
     },
     {
-     "src": "https://cdn.shaym.beauty/stone-o3tt/outdoor.jpg",
+     "src": "https://cdn.shaym.beauty/stone-o3tt/outdoor-lg.jpg",
      "kind": "outdoor",
      "name": "Outdoor",
      "caption": ""
     },
     {
-     "src": "https://cdn.shaym.beauty/stone-o3tt/indoor.jpg",
+     "src": "https://cdn.shaym.beauty/stone-o3tt/indoor-lg.jpg",
      "kind": "indoor",
      "name": "Indoor",
      "caption": ""
     },
     {
-     "src": "https://cdn.shaym.beauty/stone-o3tt/creative.jpg",
+     "src": "https://cdn.shaym.beauty/stone-o3tt/creative-lg.jpg",
      "kind": "creative",
      "name": "Creative",
      "caption": ""
