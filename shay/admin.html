@@ -25,11 +25,15 @@
     padding:.7rem 1.6rem; font-weight:700; }
   .go:disabled { opacity:.5; cursor:default; }
   .ghost { background:transparent; color:#cfe0ee; border:1px solid var(--line); border-radius:999px; padding:.5rem 1.1rem; }
+  .ghost.danger { color:var(--err); border-color:rgba(255,107,107,.4); }
+  .ghost.danger:hover { background:rgba(255,107,107,.12); }
   .log { font-size:.85rem; min-height:1.2em; color:rgba(255,255,255,.75); }
   .log.err { color:var(--err); } .log.ok { color:var(--ok); }
 
   /* gate */
   .gate { max-width:340px; margin:18vh auto 0; display:flex; flex-direction:column; gap:.8rem; text-align:center; }
+  /* an author display rule beats the UA [hidden] rule, so hide explicitly */
+  [hidden] { display:none !important; }
 
   /* nav */
   .topbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1.4rem;
@@ -82,6 +86,24 @@
   .offer .who { color:rgba(255,255,255,.8); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .offer .when { color:rgba(255,255,255,.5); font-size:.8rem; }
 
+  /* dream budget */
+  .bcards { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.4rem; }
+  @media (max-width:640px){ .bcards { grid-template-columns:1fr; } }
+  .bcard { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:1rem 1.1rem; }
+  .bcard h3 { font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--c1); margin-bottom:.5rem; }
+  .bcard .big { font-size:1.5rem; font-weight:800; }
+  .bcard .big .cap { color:rgba(255,255,255,.45); font-weight:500; font-size:1rem; }
+  .bcard .meter { height:8px; background:#121925; border-radius:999px; overflow:hidden; margin:.6rem 0 .45rem; }
+  .bcard .meter > div { height:100%; background:linear-gradient(90deg,var(--c1),var(--c2)); transition:width .3s; }
+  .bcard .meter > div.warn { background:linear-gradient(90deg,var(--warn),#f0c75a); }
+  .bcard .meter > div.over { background:linear-gradient(90deg,var(--err),#ff9b9b); }
+  .bcard .note { font-size:.76rem; color:rgba(255,255,255,.55); }
+  .bsection { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:1rem 1.1rem; margin-bottom:1rem; }
+  .bsection h3 { font-size:.95rem; margin-bottom:.2rem; }
+  .bctrl { display:flex; gap:.6rem; align-items:flex-end; flex-wrap:wrap; margin-top:.8rem; }
+  .bctrl label { flex:1; min-width:130px; }
+  .bctrl button { white-space:nowrap; }
+
   /* modal */
   .modal { position:fixed; inset:0; background:rgba(4,6,9,.85); backdrop-filter:blur(6px); display:none;
     align-items:center; justify-content:center; padding:5vh 5vw; z-index:50; }
@@ -98,8 +120,9 @@
 
   <div class="gate" id="gate">
     <h1>Stones — Admin</h1>
-    <div class="sub">Enter the admin password.</div>
+    <div class="sub">Sign in.</div>
     <input type="password" id="pass" placeholder="password" autofocus />
+    <input type="text" id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="2FA code (if enabled)" />
     <button class="go" onclick="unlock()">Enter</button>
     <div class="log err" id="gateMsg"></div>
   </div>
@@ -111,6 +134,8 @@
         <button data-v="gallery" class="on" onclick="showView('gallery')">Gallery</button>
         <button data-v="add" onclick="showView('add')">Add stone</button>
         <button data-v="offers" onclick="showView('offers')">Offers</button>
+        <button data-v="budget" onclick="showView('budget')">Dream budget</button>
+        <button data-v="security" onclick="showView('security')">Security</button>
       </nav>
     </div>
 
@@ -160,6 +185,9 @@
         <div class="sub">Adding more images to an existing stone is coming next.</div>
         <button class="go" id="eSave" onclick="saveEdit()">Save changes</button>
         <div class="log" id="editLog"></div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:1.2rem 0 .2rem" />
+        <div class="sub" style="margin-bottom:.5rem">Danger zone — removing a stone deletes it from the gallery along with its images and any “dream” generations. This can’t be undone.</div>
+        <button class="ghost danger" id="eDelete" onclick="deleteStone()">Delete this stone</button>
       </div>
     </section>
 
@@ -168,6 +196,18 @@
       <div class="sub" style="margin-bottom:1rem">Offers, newest first, grouped by stone. Click one to see the stone.</div>
       <div class="offers" id="offersList"></div>
       <div class="empty" id="offersEmpty" hidden>No offers yet.</div>
+    </section>
+
+    <!-- DREAM BUDGET -->
+    <section class="view" id="v-budget">
+      <div class="sub" style="margin-bottom:1rem">Spend on the public <b>"dream it" 360°</b> feature. A dream is generated only while it stays under <b>both</b> the monthly allowance and the lifetime cap. Leave a cap blank for unlimited.</div>
+      <div id="budgetBody"><div class="sub">Loading…</div></div>
+    </section>
+
+    <!-- SECURITY (2FA) -->
+    <section class="view" id="v-security">
+      <div class="sub" style="margin-bottom:1rem">Two-factor authentication for this admin. Works with any authenticator app — Google Authenticator, 1Password, Authy, etc.</div>
+      <div id="securityBody"><div class="sub">Loading…</div></div>
     </section>
   </div>
 </div>
@@ -181,28 +221,45 @@
 </div>
 
 <script>
-let PASS = sessionStorage.getItem('stones-admin-pass') || '';
+let TOKEN = sessionStorage.getItem('stones-admin-token') || '';
+let ENROLL_SECRET = '';
 const photos = []; // [{b64, primary}]
 
-if (PASS) boot();
+if (TOKEN) boot();
 
 async function unlock(){
-  const p = document.getElementById('pass').value;
-  const r = await fetch('/api/admin', { method:'POST',
-    headers:{'Content-Type':'application/json','x-admin-pass':p},
-    body:JSON.stringify({action:'ping'}) });
-  if (r.status === 401){ document.getElementById('gateMsg').textContent='Wrong password.'; return; }
-  PASS = p; sessionStorage.setItem('stones-admin-pass', p); boot();
+  const password = document.getElementById('pass').value;
+  const code = document.getElementById('code').value.trim();
+  const msg = document.getElementById('gateMsg'); msg.className='log err'; msg.textContent='';
+  try{
+    const r = await fetch('/api/admin', { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ action:'login', password, code: code || undefined }) });
+    const d = await r.json().catch(()=>({}));
+    if (!r.ok){ msg.textContent = d.error || 'Sign-in failed.'; if (d.need2fa) document.getElementById('code').focus(); return; }
+    TOKEN = d.token; sessionStorage.setItem('stones-admin-token', TOKEN);
+    boot(d);
+  }catch(e){ msg.textContent = 'Network error — try again.'; }
 }
 document.getElementById('pass').addEventListener('keydown', e=>{ if(e.key==='Enter') unlock(); });
+document.getElementById('code').addEventListener('keydown', e=>{ if(e.key==='Enter') unlock(); });
 
-function boot(){ document.getElementById('gate').hidden=true; document.getElementById('app').hidden=false; loadGallery(); }
+function boot(d){
+  document.getElementById('gate').hidden=true; document.getElementById('app').hidden=false;
+  document.getElementById('pass').value=''; document.getElementById('code').value='';
+  // First sign-in with no 2FA yet → steer straight to setting it up.
+  if (d && d.enrolled === false) { showView('security'); return; }
+  showView('gallery');
+}
+function logout(){ TOKEN=''; sessionStorage.removeItem('stones-admin-token');
+  document.getElementById('app').hidden=true; document.getElementById('gate').hidden=false; }
 
 async function call(body){
   const r = await fetch('/api/admin', { method:'POST',
-    headers:{'Content-Type':'application/json','x-admin-pass':PASS},
+    headers:{'Content-Type':'application/json','x-admin-token':TOKEN},
     body: JSON.stringify(body) });
   const d = await r.json().catch(()=>({}));
+  if (r.status===401 && (d.reauth || d.need2fa)){ logout(); throw new Error(d.error || 'Session expired — sign in again.'); }
   if (!r.ok) throw new Error(d.error || ('HTTP '+r.status));
   return d;
 }
@@ -212,6 +269,8 @@ function showView(v){
   document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on', b.dataset.v===v));
   if (v==='gallery') loadGallery();
   if (v==='offers') loadOffers();
+  if (v==='budget') loadBudget();
+  if (v==='security') loadSecurity();
 }
 
 function fmtDim(s){
@@ -309,7 +368,7 @@ async function createStone(){
     log.textContent='Hanging it in the gallery…'; prog.style.width='97%';
     await call({ action:'finalize', id });
     prog.style.width='100%'; log.className='log ok';
-    log.innerHTML='Done — '+(a.name||id)+' is live. <a href="https://shaym.beauty" target="_blank">see it</a>.';
+    log.innerHTML='Done — '+(a.name||id)+' is live. <a href="https://stones.art" target="_blank">see it</a>.';
     photos.length=0; renderPreviews();
     document.getElementById('name').value=''; document.getElementById('w').value=''; document.getElementById('d').value='';
   }catch(e){ log.className='log err'; log.textContent=e.message; }
@@ -342,6 +401,17 @@ async function saveEdit(){
   }catch(e){ log.className='log err'; log.textContent=e.message; }
   finally{ btn.disabled=false; }
 }
+async function deleteStone(){
+  if(!editing) return;
+  const name = editing.name || editing.id;
+  if(!confirm('Delete "'+name+'"?\n\nThis removes the stone, its images, and any dream generations. This cannot be undone.')) return;
+  const log=document.getElementById('editLog'), btn=document.getElementById('eDelete');
+  log.className='log'; log.textContent='Deleting…'; btn.disabled=true;
+  try{
+    await call({ action:'delete', id:editing.id });
+    editing=null; showView('gallery');
+  }catch(e){ log.className='log err'; log.textContent=e.message; btn.disabled=false; }
+}
 
 // ---- offers ----
 async function loadOffers(){
@@ -371,6 +441,140 @@ async function loadOffers(){
 function openModal(src,name){ document.getElementById('modalImg').src=src||'';
   document.getElementById('modalName').textContent=name||''; document.getElementById('modal').classList.add('on'); }
 function closeModal(){ document.getElementById('modal').classList.remove('on'); }
+
+// ---- dream budget ----
+function money(v){ return v==null ? '—' : '$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function capLabel(v){ return v==null ? 'Unlimited' : money(v); }
+function meter(spent,cap,over){
+  if (cap==null || !cap || spent==null) return '';
+  const pct=Math.min(100, Math.max(0, spent/cap*100));
+  const cls = over ? 'over' : (pct>=80 ? 'warn' : '');
+  return '<div class="meter"><div class="'+cls+'" style="width:'+pct+'%"></div></div>';
+}
+async function loadBudget(){
+  const body=document.getElementById('budgetBody');
+  body.innerHTML='<div class="sub">Loading…</div>';
+  try{ const { usage } = await call({action:'budget'}); renderBudget(usage); }
+  catch(e){ body.innerHTML='<div class="log err">'+esc(e.message)+'</div>'; }
+}
+function renderBudget(u){
+  const m=u.month, t=u.total;
+  const monthNote = (m.count==null?'count unavailable':m.count+' dreams this month')+
+    (m.remainingUsd!=null?' · '+money(m.remainingUsd)+' left':'')+
+    (m.bonusUsd?' · incl. '+money(m.bonusUsd)+' top-up':'');
+  const totalNote = (t.count==null?'count unavailable':t.count+' dreams all-time')+
+    (t.remainingUsd!=null?' · '+money(t.remainingUsd)+' left':'');
+  document.getElementById('budgetBody').innerHTML =
+    '<div class="bcards">'+
+      '<div class="bcard"><h3>This month · '+esc(m.ym)+'</h3>'+
+        '<div class="big">'+money(m.spentUsd)+' <span class="cap">/ '+capLabel(m.capUsd)+'</span></div>'+
+        meter(m.spentUsd,m.capUsd,m.over)+
+        '<div class="note">'+monthNote+(m.over?' · <b style="color:var(--err)">over budget — paused</b>':'')+'</div></div>'+
+      '<div class="bcard"><h3>All-time</h3>'+
+        '<div class="big">'+money(t.spentUsd)+' <span class="cap">/ '+capLabel(t.capUsd)+'</span></div>'+
+        meter(t.spentUsd,t.capUsd,t.over)+
+        '<div class="note">'+totalNote+(t.over?' · <b style="color:var(--err)">over budget — paused</b>':'')+'</div></div>'+
+    '</div>'+
+    '<div class="bsection"><h3>Top up — add headroom</h3>'+
+      '<div class="sub">Raise a cap without resetting usage. A monthly top-up applies to '+esc(m.ym)+' only.</div>'+
+      '<div class="bctrl">'+
+        '<label><span>Amount $</span><input id="topAmt" type="number" min="0" step="1" placeholder="e.g. 25"></label>'+
+        '<button class="ghost" onclick="budgetTopUp(\'month\')">Top up this month</button>'+
+        '<button class="ghost" onclick="budgetTopUp(\'total\')">Top up lifetime</button>'+
+      '</div></div>'+
+    '<div class="bsection"><h3>Set limits</h3>'+
+      '<div class="sub">Set caps directly (blank = unlimited). The monthly cap is the recurring allowance each month.</div>'+
+      '<div class="bctrl">'+
+        '<label><span>Monthly cap $</span><input id="capMonth" type="number" min="0" step="1" value="'+(m.baseCapUsd==null?'':m.baseCapUsd)+'" placeholder="unlimited"></label>'+
+        '<label><span>Lifetime cap $</span><input id="capTotal" type="number" min="0" step="1" value="'+(t.capUsd==null?'':t.capUsd)+'" placeholder="unlimited"></label>'+
+        '<button class="go" onclick="budgetSetLimits()">Save limits</button>'+
+      '</div>'+
+      '<div class="bctrl">'+
+        '<label><span>Est. cost per dream $</span><input id="costPer" type="number" min="0" step="0.01" value="'+u.costPerDreamUsd+'"></label>'+
+        '<button class="ghost" onclick="budgetSetCost()">Save cost</button>'+
+      '</div>'+
+      '<div class="note">Spend = dreams × cost-per-dream. Gemini doesn’t report exact per-call cost, so set this to match your billing.</div>'+
+    '</div>'+
+    '<div class="log" id="budgetLog"></div>';
+}
+function bLog(t,cls){ const l=document.getElementById('budgetLog'); if(l){ l.className='log'+(cls?' '+cls:''); l.textContent=t; } }
+async function doBudget(body,okMsg){
+  bLog('Saving…');
+  try{ const { usage } = await call(body); renderBudget(usage); bLog(okMsg,'ok'); }
+  catch(e){ bLog(e.message,'err'); }
+}
+function budgetTopUp(scope){
+  const amt=+document.getElementById('topAmt').value;
+  if(!(amt>0)){ bLog('Enter a positive amount.','err'); return; }
+  doBudget({action:'budgetTopUp', scope, amountUsd:amt}, 'Topped up '+(scope==='month'?'this month':'lifetime')+' by '+money(amt)+'.');
+}
+function budgetSetLimits(){
+  const m=document.getElementById('capMonth').value.trim();
+  const t=document.getElementById('capTotal').value.trim();
+  doBudget({action:'budgetSet', monthlyCapUsd:(m===''?null:+m), totalCapUsd:(t===''?null:+t)}, 'Limits saved.');
+}
+function budgetSetCost(){
+  const c=+document.getElementById('costPer').value;
+  if(!(c>0)){ bLog('Cost per dream must be a positive number.','err'); return; }
+  doBudget({action:'budgetSet', costPerDreamUsd:c}, 'Cost per dream updated.');
+}
+
+// ---- security (2FA) ----
+async function loadSecurity(){
+  const body=document.getElementById('securityBody');
+  body.innerHTML='<div class="sub">Loading…</div>';
+  try{ renderSecurity(await call({action:'authStatus'})); }
+  catch(e){ body.innerHTML='<div class="log err">'+esc(e.message)+'</div>'; }
+}
+function secLog(t,cls){ const l=document.getElementById('secLog'); if(l){ l.className='log'+(cls?' '+cls:''); l.textContent=t; } }
+function renderSecurity(s){
+  const b=document.getElementById('securityBody');
+  if (s.enrolled){
+    b.innerHTML='<div class="bsection"><h3>🔒 Two-factor is ON</h3>'+
+      '<div class="sub">Every sign-in needs your authenticator code. '+s.recoveryRemaining+' recovery code'+(s.recoveryRemaining===1?'':'s')+' remaining.</div>'+
+      '<div class="bctrl"><label><span>Current code to turn off</span><input id="disCode" inputmode="numeric" placeholder="123456"></label>'+
+        '<button class="ghost" onclick="disable2fa()">Turn off 2FA</button></div>'+
+      '<div class="log" id="secLog"></div></div>';
+  } else {
+    b.innerHTML='<div class="bsection"><h3>Two-factor is OFF</h3>'+
+      '<div class="sub">Add an authenticator app as a second factor at sign-in. Strongly recommended.</div>'+
+      '<button class="go" onclick="enrollStart()" style="margin-top:.8rem">Set up authenticator</button>'+
+      '<div id="enrollArea"></div><div class="log" id="secLog"></div></div>';
+  }
+}
+async function enrollStart(){
+  const area=document.getElementById('enrollArea'); area.innerHTML='<div class="sub" style="margin-top:1rem">Generating…</div>';
+  try{
+    const d=await call({action:'enrollStart'}); ENROLL_SECRET=d.secret;
+    area.innerHTML='<div style="display:flex;gap:1.2rem;flex-wrap:wrap;align-items:flex-start;margin-top:1rem">'+
+      (d.qr?'<img src="'+d.qr+'" alt="Authenticator QR" style="width:200px;height:200px;border-radius:12px;border:1px solid var(--line);background:#fff">':'')+
+      '<div style="flex:1;min-width:220px">'+
+        '<div class="sub">Scan with your authenticator app, or enter this key manually:</div>'+
+        '<div style="font-family:monospace;font-size:.9rem;word-break:break-all;background:#0a0e13;border:1px solid var(--line);border-radius:8px;padding:.55rem;margin:.5rem 0">'+esc(d.secret)+'</div>'+
+        '<label><span>Enter the 6-digit code to confirm</span><input id="confCode" inputmode="numeric" placeholder="123456"></label>'+
+        '<button class="go" onclick="enrollConfirm()" style="margin-top:.6rem">Confirm &amp; enable</button>'+
+      '</div></div>';
+    const ci=document.getElementById('confCode'); ci.focus();
+    ci.addEventListener('keydown',e=>{ if(e.key==='Enter') enrollConfirm(); });
+  }catch(e){ area.innerHTML='<div class="log err">'+esc(e.message)+'</div>'; }
+}
+async function enrollConfirm(){
+  const code=document.getElementById('confCode').value.trim();
+  try{
+    const d=await call({action:'enrollConfirm', secret:ENROLL_SECRET, code});
+    document.getElementById('enrollArea').innerHTML=
+      '<div class="bsection" style="border-color:var(--ok);margin-top:1rem"><h3>✅ 2FA enabled — save your recovery codes</h3>'+
+      '<div class="sub">Each works once if you lose your phone. Store them safely — they won’t be shown again.</div>'+
+      '<div style="font-family:monospace;columns:2;column-gap:1.2rem;background:#0a0e13;border:1px solid var(--line);border-radius:8px;padding:.7rem .9rem;margin:.7rem 0">'+
+        d.recoveryCodes.map(c=>'<div>'+esc(c)+'</div>').join('')+'</div>'+
+      '<button class="ghost" onclick="loadSecurity()">Done</button></div>';
+  }catch(e){ secLog(e.message,'err'); }
+}
+async function disable2fa(){
+  const code=(document.getElementById('disCode')||{}).value||'';
+  try{ await call({action:'disable2fa', code:code.trim()}); loadSecurity(); }
+  catch(e){ secLog(e.message,'err'); }
+}
 
 // ---- utils ----
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }

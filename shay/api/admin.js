@@ -1,4 +1,4 @@
-// POST /api/admin — gallery administration (admin.shaym.beauty).
+// POST /api/admin — gallery administration (admin.stones.art).
 // Auth: x-admin-pass header checked against env ADMIN_PASSWORD.
 //
 // Stone rows live in Supabase; image bytes (originals, looks, cutouts) live in
@@ -29,7 +29,9 @@ const LABEL = { blur: "Sophisticated Blur", outdoor: "Outdoor", indoor: "Indoor"
 const MAX_LOOKS = 12;
 const MAX_PHOTOS = 8;
 
-const { r2put } = require("./_storage.js");
+const { r2put, r2del, CDN } = require("./_storage.js");
+const budget = require("./_budget.js");
+const auth = require("./_auth.js");
 
 const slug = (s) => String(s).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const num = (d) => (Number(d) > 0 && Number(d) < 10000 ? Number(d) : null);
@@ -156,8 +158,8 @@ Decide how many looks of each category genuinely flatter THIS stone — there is
 Total looks between 5 and ${MAX_LOOKS}. Favour categories that suit this stone; it's fine to give one category several looks and another none. Where multiple angles are provided, use them so different looks reveal different sides.
 
 For each look write a polished image-generation prompt that:
-1. Begins with: "Take the exact stone from the provided photo(s) — preserve its shape, texture, colors and every distinctive feature faithfully —"
-2. Then describes placement, setting, lighting, camera/lens feel, and mood in rich detail.
+1. Begins with: "Take the exact stone — together with the display stand or mount it is fixed to, if any — from the provided photo(s), preserving its shape, texture, colors, its stand, and every distinctive feature faithfully —"
+2. Then describes placement, setting, lighting, camera/lens feel, and mood in rich detail. If the stone has a display stand/mount, it stays on that stand as one piece; never reproduce the original table or surface the stand was photographed on — give it a fresh setting.
 3. For "blur": the background must be sophisticatedly blurred (shallow depth of field, refined bokeh), stone in crisp focus.
 Also write a short poetic caption (under 12 words) per look.
 
@@ -199,7 +201,7 @@ async function stageLook(stoneRow, index) {
 async function stageCutout(stoneRow) {
   const sharp = require("sharp");
   const buf = await fetchOriginal(stoneRow);
-  const prompt = `Isolate the stone from this photo: render the EXACT same stone — identical shape, texture, colors, lighting and angle — floating on a completely uniform pure green background (#00FF00). NOTHING else from the photo may remain — no ground, no shadow, no surface under the stone. Only the stone itself, surrounded on ALL sides (including below) by flat chroma green. Do not alter the stone itself in any way.`;
+  const prompt = `Isolate the stone — together with the display stand or mount it is physically fixed to — from this photo. Render the EXACT same stone AND its stand — identical shape, texture, colors, lighting and angle — floating on a completely uniform pure green background (#00FF00). KEEP the stand, base or mount that the stone is attached to or seated in: it is part of the piece. REMOVE everything the stand itself rests on — the table, ground, floor, shelf or any surface beneath it — and every other element (no shadow, no soil, no leaves, no pebbles). If the stone has NO stand, output only the stone. The stone-and-stand must be surrounded on ALL sides (including below the bottom of the stand) by flat chroma green. Do not alter the stone or its stand in any way.`;
   const green = await gemini(IMAGE_MODEL, [imagePart(buf), { text: prompt }], { imageOut: true });
   const { data: px, info } = await sharp(green).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   for (let i = 0; i < px.length; i += 4) {
@@ -221,18 +223,53 @@ async function stageCutout(stoneRow) {
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") { res.statusCode = 405; return res.json({ error: "POST only" }); }
-  if (!process.env.ADMIN_PASSWORD || req.headers["x-admin-pass"] !== process.env.ADMIN_PASSWORD) {
-    res.statusCode = 401;
-    return res.json({ error: "Wrong password." });
-  }
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
-    res.statusCode = 500;
-    return res.json({ error: "Storage is not configured." });
-  }
+  if (!process.env.ADMIN_PASSWORD) { res.statusCode = 500; return res.json({ error: "Admin is not configured." }); }
 
   const { action } = req.body || {};
   try {
+    // ---- login: password (+ TOTP code if 2FA is enrolled) → signed session ----
+    if (action === "login") {
+      if (!auth.passwordOk(req.body.password)) { res.statusCode = 401; return res.json({ error: "Wrong password." }); }
+      const cfg = await auth.loadAuthConfig();
+      if (auth.isEnrolled(cfg)) {
+        if (!req.body.code) { res.statusCode = 401; return res.json({ error: "Enter your authenticator code.", need2fa: true }); }
+        const { ok } = await auth.verifySecondFactor(cfg, req.body.code);
+        if (!ok) { res.statusCode = 401; return res.json({ error: "That code didn't match — try again.", need2fa: true }); }
+      }
+      return res.json({ token: auth.createSession(), enrolled: auth.isEnrolled(cfg) });
+    }
+
+    // ---- every other action requires a valid session token (x-admin-token) ----
+    if (!auth.requireSession(req)) { res.statusCode = 401; return res.json({ error: "Please sign in again.", reauth: true }); }
+
     if (action === "ping") return res.json({ ok: true });
+
+    // ---- 2FA management ----
+    if (action === "authStatus") {
+      const cfg = await auth.loadAuthConfig();
+      return res.json({ enrolled: auth.isEnrolled(cfg), recoveryRemaining: (cfg.recoveryHashes || []).length });
+    }
+    if (action === "enrollStart") {
+      const secret = auth.newSecret();
+      const otpauth = auth.otpauthUri(secret);
+      const qr = await require("qrcode").toDataURL(otpauth, { margin: 1, width: 220 }).catch(() => null);
+      return res.json({ secret, otpauth, qr });
+    }
+    if (action === "enrollConfirm") {
+      if (!auth.totpOk(req.body.secret, req.body.code)) { res.statusCode = 400; return res.json({ error: "Code didn't verify — check your phone's clock and retry." }); }
+      const recoveryCodes = auth.newRecoveryCodes(10);
+      await auth.saveAuthConfig({ secret: req.body.secret, recoveryHashes: recoveryCodes.map(auth.hashCode), enrolledAt: new Date().toISOString() });
+      return res.json({ ok: true, recoveryCodes });
+    }
+    if (action === "disable2fa") {
+      const cfg = await auth.loadAuthConfig();
+      if (auth.isEnrolled(cfg)) {
+        const { ok } = await auth.verifySecondFactor(cfg, req.body.code);
+        if (!ok) { res.statusCode = 400; return res.json({ error: "Enter a current code to turn 2FA off." }); }
+      }
+      await auth.saveAuthConfig({ secret: null, recoveryHashes: [], enrolledAt: null });
+      return res.json({ ok: true });
+    }
 
     // ---- gallery list (admin) ----
     if (action === "list") {
@@ -265,6 +302,28 @@ module.exports = async (req, res) => {
         stone_original: o.stones?.images?.original || null,
       }));
       return res.json({ offers });
+    }
+
+    // ---- dream budget (admin) ----
+    if (action === "budget") {
+      const cfg = await budget.loadConfig();
+      const usage = await budget.computeUsage(cfg);
+      return res.json({ usage });
+    }
+    if (action === "budgetSet") {
+      const { monthlyCapUsd, totalCapUsd, costPerDreamUsd } = req.body;
+      await budget.setBudget({ monthlyCapUsd, totalCapUsd, costPerDreamUsd });
+      return res.json({ usage: await budget.computeUsage() });
+    }
+    if (action === "budgetTopUp") {
+      await budget.topUp({ scope: req.body.scope, amountUsd: req.body.amountUsd });
+      return res.json({ usage: await budget.computeUsage() });
+    }
+
+    // ---- everything below needs the database ----
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+      res.statusCode = 500;
+      return res.json({ error: "Storage is not configured." });
     }
 
     // ---- create (multi-photo, admin-chosen primary) ----
@@ -331,7 +390,7 @@ module.exports = async (req, res) => {
           to: process.env.OFFER_NOTIFY,
           subject: `${stone.name} is ready — live in the gallery`,
           html: stoneEmail({
-            preheader: `${stone.name} finished processing and is live on shaym.beauty.`,
+            preheader: `${stone.name} finished processing and is live on stones.art.`,
             heading: `${stone.name} is ready`,
             intro: stone.character || "Processed, framed, and hanging in the gallery.",
             image: looks[0]?.src || stone.images?.original || null,
@@ -340,11 +399,43 @@ module.exports = async (req, res) => {
               ...(dims ? [{ label: "Size", value: dims }] : []),
               { label: "Id", value: stone.id },
             ],
-            cta: { label: "See it live", url: "https://shaym.beauty" },
+            cta: { label: "See it live", url: "https://stones.art" },
           }),
         }).catch((e) => console.error("ready email:", e.message));
       }
       return res.json({ ok: true, id: stone.id });
+    }
+
+    // ---- delete a stone (row + its R2 images + its dreams) ----
+    if (action === "delete") {
+      const { url, headers } = sb();
+      // remove dependent dream rows first (they reference this stone)
+      await fetch(`${url}/rest/v1/dreams?stone_id=eq.${encodeURIComponent(stone.id)}`, {
+        method: "DELETE", headers: { ...headers, Prefer: "return=minimal" },
+      }).catch(() => {});
+      // delete the stone row
+      const del = await fetch(`${url}/rest/v1/stones?id=eq.${encodeURIComponent(stone.id)}`, {
+        method: "DELETE", headers: { ...headers, Prefer: "return=minimal" },
+      });
+      if (!del.ok) {
+        const t = (await del.text()).toLowerCase();
+        res.statusCode = del.status === 409 || t.includes("foreign key") ? 409 : 502;
+        return res.json({
+          error: del.status === 409 || t.includes("foreign key")
+            ? "This stone has offers attached — those are kept, so the stone can't be auto-deleted. Tell me if you want to delete it with its offers."
+            : `Delete failed (${del.status}).`,
+        });
+      }
+      // best-effort: remove the stone's images from R2 (originals, looks, cutout)
+      const img = stone.images || {};
+      const urls = [];
+      for (const k of Object.keys(img)) {
+        if (k === "looks" && Array.isArray(img.looks)) img.looks.forEach((l) => l && l.src && urls.push(l.src));
+        else if (typeof img[k] === "string") urls.push(img[k]);
+      }
+      const keys = urls.filter((u) => u && u.startsWith(CDN)).map((u) => u.slice(CDN.length + 1));
+      await Promise.all(keys.map((k) => r2del(k).catch(() => {})));
+      return res.json({ ok: true, id: stone.id, removedImages: keys.length });
     }
 
     res.statusCode = 400;

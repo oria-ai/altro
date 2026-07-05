@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
     const name = info?.name || stone;
     const heroSrc = info?.looks?.[0]?.src || info?.original || null;
     const img = heroSrc
-      ? (heroSrc.startsWith("http") ? heroSrc : `https://shaym.beauty/${heroSrc}`)
+      ? (heroSrc.startsWith("http") ? heroSrc : `https://stones.art/${heroSrc}`)
       : null;
     const usd = "$" + amount.toLocaleString("en-US", { maximumFractionDigits: 0 });
     const sizeRow = info?.dimensions
@@ -68,7 +68,7 @@ module.exports = async (req, res) => {
           big: usd,
           image: img,
           rows: [{ label: "Stone", value: name }, ...sizeRow, { label: "From", value: to }],
-          cta: { label: "Open the gallery", url: "https://shaym.beauty" },
+          cta: { label: "Open the gallery", url: "https://stones.art" },
         }),
       }));
     }
@@ -83,7 +83,7 @@ module.exports = async (req, res) => {
         big: usd,
         image: img,
         rows: [{ label: "Stone", value: name }, ...sizeRow],
-        cta: { label: "Back to the stones", url: "https://shaym.beauty" },
+        cta: { label: "Back to the stones", url: "https://stones.art" },
       }),
     }));
     await Promise.allSettled(jobs).then((rs) =>

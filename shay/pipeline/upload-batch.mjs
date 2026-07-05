@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const ENDPOINT = process.env.ENDPOINT || "https://shaym.beauty/api/admin";
+const ENDPOINT = process.env.ENDPOINT || "https://stones.art/api/admin";
 const PASS = process.env.ADMIN_PASSWORD;
 const SRC = process.env.SRC || "/home/oriamasas/shay/input/avanim";
 const STATE = "/home/oriamasas/shay/pipeline/batch-state.json";

@@ -3,3 +3,5 @@ input
 .git
 archive
 .vercel.aurelius.bak
+node_modules
+research

@@ -25,7 +25,7 @@ const orig = src.startsWith("http")
 
 // 1) Gemini: same stone, pure chroma-green background (green survives
 //    thresholding far better than white — stones contain white, never #00ff00)
-const prompt = `Isolate the stone from this photo: render the EXACT same stone — identical shape, texture, colors, lighting and angle — floating on a completely uniform pure green background (#00FF00). NOTHING else from the photo may remain — no ground, no soil, no leaves, no pebbles, no shadow, no surface under the stone. Only the stone itself, surrounded on ALL sides (including below) by flat chroma green. Do not alter the stone itself in any way.`;
+const prompt = `Isolate the stone — together with the display stand or mount it is physically fixed to — from this photo. Render the EXACT same stone AND its stand — identical shape, texture, colors, lighting and angle — floating on a completely uniform pure green background (#00FF00). KEEP the stand, base or mount that the stone is attached to or seated in: it is part of the piece. REMOVE everything the stand itself rests on — the table, ground, floor, shelf or any surface beneath it — and every other element (no soil, no leaves, no pebbles, no shadow). If the stone has NO stand, output only the stone. The stone-and-stand must be surrounded on ALL sides (including below the bottom of the stand) by flat chroma green. Do not alter the stone or its stand in any way.`;
 
 const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${KEY}`, {
   method: "POST",

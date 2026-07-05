@@ -22,11 +22,22 @@
       "has": [
         {
           "type": "host",
-          "value": "admin.shaym.beauty"
+          "value": "admin\\.(shaym\\.beauty|stones\\.art)"
         }
       ],
       "destination": "/admin.html",
       "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?shaym\\.beauty"
+        }
+      ],
+      "destination": "https://stones.art/:path*",
+      "permanent": true
     }
   ]
 }

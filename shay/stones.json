@@ -1,0 +1,1408 @@
+{
+ "stones": [
+  {
+   "id": "stone-1guo",
+   "name": "Cosmic Ascent",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 18,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-1guo/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-1guo/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-1guo/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-1guo/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-1guo/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-1guo/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-c285",
+   "name": "Fluid Embrace",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 30,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-c285/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-c285/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-c285/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-c285/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-c285/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-c285/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-pepw",
+   "name": "Flowing Curves",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 50,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-pepw/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-pepw/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-pepw/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-pepw/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-pepw/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-pepw/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-z81b",
+   "name": "Desert Wave",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 42,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-z81b/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-z81b/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-z81b/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-z81b/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-z81b/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-z81b/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-ceff",
+   "name": "Silent Sentinel",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 105,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-ceff/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-ceff/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-ceff/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-ceff/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-ceff/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-ceff/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-yo2p",
+   "name": "Golden Flow",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 27,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-yo2p/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-yo2p/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-yo2p/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-yo2p/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-yo2p/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-yo2p/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-klh2",
+   "name": "Silent Ascent",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 120,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-klh2/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-klh2/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-klh2/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-klh2/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-klh2/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-klh2/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-vhdw",
+   "name": "Quiet Lumen",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 22,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-vhdw/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-vhdw/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-vhdw/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-vhdw/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-vhdw/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-vhdw/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-ukrp",
+   "name": "Gentle Ascent",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 62,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-ukrp/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-ukrp/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-ukrp/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-ukrp/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-ukrp/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-ukrp/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-7f29",
+   "name": "Desert Wave",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 104,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-7f29/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-7f29/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-7f29/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-7f29/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-7f29/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-7f29/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-2930",
+   "name": "Silent Sentinel",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 45,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-2930/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-2930/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-2930/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-2930/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-2930/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-2930/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-rb24",
+   "name": "Shadow Vessel",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 22,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-rb24/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-rb24/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-rb24/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-rb24/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-rb24/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-rb24/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-v2ei",
+   "name": "Woodland Sentinel",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 55,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-v2ei/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-v2ei/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-v2ei/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-v2ei/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-v2ei/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-v2ei/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-si53",
+   "name": "Amber Ascent",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 65,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-si53/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-si53/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-si53/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-si53/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-si53/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-si53/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-3m6q",
+   "name": "Earthy Serenity",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 25,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-3m6q/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-3m6q/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-3m6q/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-3m6q/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-3m6q/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-3m6q/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-ihmr",
+   "name": "Volcanic Soul",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 36,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-ihmr/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-ihmr/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-ihmr/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-ihmr/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-ihmr/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-ihmr/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-shxx",
+   "name": "Dappled Dream",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 12,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-shxx/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-shxx/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-shxx/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-shxx/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-shxx/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-shxx/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-h8rp",
+   "name": "Sublime Contours",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 140,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-h8rp/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-h8rp/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-h8rp/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-h8rp/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-h8rp/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-h8rp/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-zsvw",
+   "name": "Blushing Embrace",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 42,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-zsvw/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-zsvw/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-zsvw/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-zsvw/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-zsvw/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-zsvw/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-eygm",
+   "name": "Stratum Sentinel",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 10,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-eygm/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-eygm/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-eygm/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-eygm/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-eygm/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-eygm/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-rs4p",
+   "name": "Onyx Flow",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 35,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-rs4p/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-rs4p/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-rs4p/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-rs4p/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-rs4p/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-rs4p/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-kxvr",
+   "name": "Earthen Embrace",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 38,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-kxvr/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-kxvr/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-kxvr/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-kxvr/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-kxvr/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-kxvr/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-izsv",
+   "name": "Lunar Drift",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 40,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-izsv/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-izsv/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-izsv/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-izsv/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-izsv/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-izsv/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-lz8a",
+   "name": "Obsidian Teardrop",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 12,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-lz8a/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-lz8a/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-lz8a/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-lz8a/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-lz8a/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-lz8a/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-7k5l",
+   "name": "Ethereal Curve",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 88,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-7k5l/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-7k5l/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-7k5l/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-7k5l/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-7k5l/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-7k5l/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-8szk",
+   "name": "Ethereal Ascent",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 45,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-8szk/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-8szk/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-8szk/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-8szk/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-8szk/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-8szk/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-kvjq",
+   "name": "Eroded Grace",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 70,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-kvjq/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-kvjq/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-kvjq/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-kvjq/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-kvjq/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-kvjq/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-4p97",
+   "name": "Pale Sentinel",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 105,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-4p97/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-4p97/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-4p97/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-4p97/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-4p97/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-4p97/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-5ipj",
+   "name": "Fluid Form",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 38,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-5ipj/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-5ipj/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-5ipj/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-5ipj/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-5ipj/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-5ipj/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-o3tt",
+   "name": "Serene Form",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 22,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-o3tt/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-o3tt/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-o3tt/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-o3tt/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-o3tt/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-o3tt/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-8v4z",
+   "name": "Desert Flow",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 18,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-8v4z/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-8v4z/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-8v4z/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-8v4z/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-8v4z/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-8v4z/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-j8bb",
+   "name": "Desert Flow",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 16.5,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-j8bb/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-j8bb/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-j8bb/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-j8bb/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-j8bb/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-j8bb/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-h40c",
+   "name": "Timeless Ascent",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 110,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-h40c/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-h40c/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-h40c/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-h40c/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-h40c/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-h40c/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-dpem",
+   "name": "Sienna Void",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 30,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-dpem/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-dpem/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-dpem/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-dpem/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-dpem/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-dpem/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-rj0u",
+   "name": "Eroded Summit",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 39,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-rj0u/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-rj0u/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-rj0u/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-rj0u/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-rj0u/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-rj0u/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "stone-4tno",
+   "name": "Curved Grace",
+   "character": "",
+   "status": "available",
+   "dimensions": {
+    "height_cm": 22,
+    "approx": true
+   },
+   "top_offer_usd": null,
+   "thumb": "https://cdn.shaym.beauty/stone-4tno/original.jpg",
+   "original": "https://cdn.shaym.beauty/stone-4tno/original.jpg",
+   "looks": [
+    {
+     "src": "https://cdn.shaym.beauty/stone-4tno/blur.jpg",
+     "kind": "blur",
+     "name": "Sophisticated Blur",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-4tno/outdoor.jpg",
+     "kind": "outdoor",
+     "name": "Outdoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-4tno/indoor.jpg",
+     "kind": "indoor",
+     "name": "Indoor",
+     "caption": ""
+    },
+    {
+     "src": "https://cdn.shaym.beauty/stone-4tno/creative.jpg",
+     "kind": "creative",
+     "name": "Creative",
+     "caption": ""
+    }
+   ]
+  }
+ ]
+}

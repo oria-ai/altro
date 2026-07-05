@@ -49,14 +49,18 @@
       opacity: 0; animation: rise 1.3s cubic-bezier(0.16,1,0.3,1) .7s forwards; }
 
     /* stone cards (manifest-driven) */
-    .stones { display: flex; gap: clamp(1.4rem,4vw,2.6rem); flex-wrap: wrap;
-      justify-content: center; align-items: flex-start; }
+    .stones { display: grid; gap: clamp(1.2rem,2.5vw,2rem);
+      grid-template-columns: repeat(4, clamp(9rem,20vw,15rem));
+      justify-content: center; align-items: start; }
+    @media (max-width:980px){ .stones{ grid-template-columns: repeat(3, minmax(0,14rem)); } }
+    @media (max-width:720px){ .stones{ grid-template-columns: repeat(2, minmax(0,15rem)); } }
+    @media (max-width:440px){ .stones{ grid-template-columns: minmax(0,16rem); } }
     .stone { opacity: 0; cursor: pointer; animation: rise 1.4s cubic-bezier(0.16,1,0.3,1) 1s forwards; }
     .stone .size { margin-top:.3rem; font-size: clamp(.6rem,1.2vw,.7rem); font-weight:500;
       letter-spacing:.18em; color: rgba(255,255,255,.55); text-transform:uppercase; }
     .stone figure {
       position: relative;
-      width: clamp(11rem, 24vw, 16rem); aspect-ratio: 1 / 1;
+      width: 100%; aspect-ratio: 1 / 1;
       border-radius: 18px; overflow: hidden;
       box-shadow: 0 18px 50px -12px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.08) inset;
       transition: transform .6s cubic-bezier(0.16,1,0.3,1); }
@@ -70,7 +74,10 @@
       text-shadow: 0 1px 3px rgba(0,0,0,.8); }
     .stone .cap { margin-top: .35rem; font-size: clamp(.72rem,1.5vw,.85rem);
       font-weight: 300; font-style: italic; color: rgba(255,255,255,.7);
-      text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+      text-shadow: 0 1px 2px rgba(0,0,0,.8);
+      line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+      min-height: calc(1.4em * 2); }
 
     .soon { display: flex; align-items: center; gap: 1rem; margin-top: clamp(1rem,3vh,2rem);
       font-size: clamp(.7rem,1.4vw,.82rem); font-weight: 500;
@@ -234,7 +241,9 @@
       animation:dreamPulse 2.6s ease-in-out infinite; z-index:2; }
     @keyframes dreamPulse { 0%,100%{opacity:1;} 50%{opacity:.5;} }
     .dream-slide.dreaming .dream-email { position:absolute; left:50%; top:calc(50% + 4.2rem); transform:translateX(-50%);
-      width:min(86%,24rem); z-index:3; }
+      width:min(86%,24rem); z-index:3; animation:offerInCentered .35s cubic-bezier(0.16,1,0.3,1); }
+    /* centered variant — keeps translateX(-50%) so the box rises in place, not from the right */
+    @keyframes offerInCentered { from{opacity:0;transform:translateX(-50%) translateY(10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
 
     /* after a dream: the slide shows the room photo — click to re-enter */
     .lb-stage img.dream-result { position:absolute; inset:0; width:100%; height:100%;
@@ -375,7 +384,7 @@
         <div class="dream-panel">
           <div class="dream-head">See it in your home</div>
           <div class="dream-sub">Describe a room — and see this stone there, in full&nbsp;360&deg;.</div>
-          <textarea id="dreamDesc" maxlength="600" placeholder="Tall windows, soft afternoon light, a worn leather armchair&hellip;" onclick="event.stopPropagation()"></textarea>
+          <textarea id="dreamDesc" maxlength="600" placeholder="Tall windows, soft afternoon light, a worn leather armchair&hellip;" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();startDream(event);}"></textarea>
           <button class="dream-go" id="dreamGo" onclick="startDream(event)">Dream it &mdash; 360&deg;</button>
           <div class="dream-msg" id="dreamMsg" role="status"></div>
           <div class="dream-email" id="dreamEmail" hidden>
@@ -475,7 +484,7 @@
         card.className='stone'; card.style.animationDelay=(1+i*.25)+'s';
         card.setAttribute('role','button'); card.tabIndex=0;
         card.setAttribute('aria-label','Open '+s.name+' gallery');
-        card.innerHTML='<figure><img src="'+heroSrc(s)+'" alt="'+s.name+'">'+
+        card.innerHTML='<figure><img src="'+(s.thumb||heroSrc(s))+'" alt="'+s.name+'" loading="'+(i<6?'eager':'lazy')+'" decoding="async" data-fb="'+(s.original||heroSrc(s))+'" onerror="if(!this._fb){this._fb=1;this.src=this.dataset.fb}" fetchpriority="'+(i<3?'high':'auto')+'">'+
           '<button class="info-btn" aria-label="Info about '+s.name+'">i</button></figure>'+
           '<figcaption><div class="name">'+s.name+'</div>'+
           '<div class="size">'+sizeLabel(s.dimensions)+'</div>'+
@@ -493,7 +502,11 @@
       els=[]; thumbs.innerHTML='';
       document.getElementById('lbTitle').textContent=s.name;
       dreamSlide.querySelector('.dream-bg').src=dreamBg(s);
+      // reset the shared dream-slide's transient bits, then show only THIS stone's state
+      document.getElementById('dreamEmail').hidden=true;
+      document.getElementById('dreamMsg').textContent='';
       renderDreamResult();
+      syncDreamingClass();
       slides.forEach((v,i)=>{
         if(v.dream){ els.push(dreamSlide); }
         else {
@@ -555,11 +568,27 @@
     document.getElementById('info').addEventListener('click',e=>{ if(e.target.id==='info') closeInfo(); });
     window.openInfo=openInfo; window.closeInfo=closeInfo;
 
+    // Normalize a manifest.json entry (legacy `variants` object) into the same
+    // `looks` array the /api/stones endpoint returns, so the gallery shows the
+    // centered `blur` hero (not the raw, off-center original) and the lightbox
+    // gets its slides. Mirrors api/stones.js.
+    function normalizeManifest(arr){
+      return (arr||[]).map(s=>{
+        if(Array.isArray(s.looks)) return s; // already API-shaped
+        let looks=[];
+        const v=s.variants||{};
+        for(const k of ['blur','outdoor','indoor','creative']){
+          if(v[k]&&v[k].src) looks.push({src:v[k].src,caption:v[k].caption||'',kind:k,name:VLABEL[k]});
+        }
+        return { ...s, looks, original: (typeof s.original==='string'?s.original:(s.original&&s.original.src))||'' };
+      }).filter(s=>s.looks.length);
+    }
+
     // DB-backed source of truth; manifest is the fallback
     fetch('/api/stones').then(r=>r.ok?r.json():Promise.reject())
       .then(d=>{ STONES=d.stones||[]; renderCards(); })
       .catch(()=>fetch('stones/manifest.json').then(r=>r.ok?r.json():[]).catch(()=>[])
-        .then(d=>{ STONES=d; renderCards(); }));
+        .then(d=>{ STONES=normalizeManifest(d); renderCards(); }));
 
     // ---- offer ----
     function toggleOffer(e){ if(e) e.stopPropagation();
@@ -609,7 +638,7 @@
     // ---- dream: describe your home → Gemini 360 panorama ----
     const DREAM_LINES = ["Reading your words…","Raising the walls…","Pouring the light…",
                          "Placing the stone…","Stitching the horizon…","Almost there…"];
-    let dreaming=false, emailCapable=null, emailTimer=null, pendingEmail=null;
+    let dreaming=false, dreamingStoneId=null, emailCapable=null, emailTimer=null, pendingEmail=null;
     // probe email capability once on load
     fetch('/api/dream').then(r=>r.json()).then(c=>{ emailCapable=!!c.emailDelivery; }).catch(()=>{ emailCapable=false; });
 
@@ -730,21 +759,32 @@
       }
     }
 
+    // The dream slide is a single shared element. Show its "working on…" state
+    // only when the stone being generated is the one currently on screen — so
+    // opening a different stone mid-dream never shows another stone's progress.
+    function syncDreamingClass(){
+      dreamSlide.classList.toggle('dreaming', !!activeStone && activeStone.id===dreamingStoneId);
+    }
+
     async function startDream(e){
       if(e) e.stopPropagation();
-      if(dreaming) return;
-      const desc=document.getElementById('dreamDesc').value.trim(),
-            msg=document.getElementById('dreamMsg'), go=document.getElementById('dreamGo');
+      const msg=document.getElementById('dreamMsg'), go=document.getElementById('dreamGo');
+      if(dreaming){ msg.textContent='Another dream is still rendering — one moment…'; msg.className='dream-msg'; return; }
+      const stone=activeStone;                                   // bind this dream to the stone it started on
+      if(!stone) return;
+      const onStone=()=> !!activeStone && activeStone.id===stone.id;   // is that stone still on screen?
+      const desc=document.getElementById('dreamDesc').value.trim();
       if(desc.length<3){ msg.textContent='Tell us a little more about your home.'; msg.className='dream-msg err'; return; }
-      dreaming=true; go.disabled=true; msg.className='dream-msg'; dreamSlide.classList.add('dreaming');
+      dreaming=true; dreamingStoneId=stone.id; go.disabled=true; msg.className='dream-msg';
+      syncDreamingClass();
       let li=0; msg.textContent=DREAM_LINES[0];
-      const ticker=setInterval(()=>{ msg.textContent=DREAM_LINES[++li%DREAM_LINES.length]; }, 4000);
-      // after 3s of dreaming, offer email delivery (if the backend can send)
-      emailTimer=setTimeout(()=>{ if(dreaming && emailCapable) document.getElementById('dreamEmail').hidden=false; }, 3000);
+      const ticker=setInterval(()=>{ if(onStone()) msg.textContent=DREAM_LINES[++li%DREAM_LINES.length]; }, 4000);
+      // after 3s of dreaming, offer email delivery (if the backend can send) — only if still on this stone
+      emailTimer=setTimeout(()=>{ if(dreaming && emailCapable && onStone()) document.getElementById('dreamEmail').hidden=false; }, 3000);
       try{
         const r=await fetch('/api/dream',{ method:'POST',
           headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({ stone:activeStone?activeStone.id:'flint', description:desc }) });
+          body:JSON.stringify({ stone:stone.id, description:desc }) });
         if(!r.ok){
           let m='The dream engine is unavailable right now.';
           try{ m=(await r.json()).error || m; }catch(_){}
@@ -752,26 +792,33 @@
         }
         const blob=await r.blob();
         const dreamId=r.headers.get('x-dream-id')||null;
-        clearInterval(ticker); clearTimeout(emailTimer); msg.textContent='';
-        document.getElementById('dreamEmail').hidden=true;
-        const old=activeStone&&dreamResults[activeStone.id];
+        clearInterval(ticker); clearTimeout(emailTimer);
+        // store the result under the stone it was generated FOR (not whatever is active now)
+        const old=dreamResults[stone.id];
         if(old&&old.url&&old.url.indexOf('blob:')===0) URL.revokeObjectURL(old.url);
         const objUrl=URL.createObjectURL(blob);
-        if(activeStone){ dreamResults[activeStone.id]={ blob, desc, url:objUrl, dreamId };
-          if(dreamId) rememberDream(activeStone.id, dreamId, desc); }
+        dreamResults[stone.id]={ blob, desc, url:objUrl, dreamId };
+        if(dreamId) rememberDream(stone.id, dreamId, desc);
         // if the visitor asked to be emailed while it rendered, send it now (one generation, real email)
         if(pendingEmail && dreamId){
           fetch('/api/dream',{ method:'POST', headers:{'Content-Type':'application/json'},
             body:JSON.stringify({ emailExisting:dreamId, email:pendingEmail }) }).catch(()=>{});
           pendingEmail=null;
         }
-        renderDreamResult();
-        await openPano(objUrl, dreamId);
+        // only surface the result (clear status, open the pano) if the user is still on this stone
+        if(onStone()){
+          msg.textContent=''; document.getElementById('dreamEmail').hidden=true;
+          renderDreamResult();
+          await openPano(objUrl, dreamId);
+        }
       }catch(err){
         clearInterval(ticker); clearTimeout(emailTimer); pendingEmail=null;
-        msg.textContent=err.message||'Something went wrong — try again.';
-        msg.className='dream-msg err';
-      }finally{ dreaming=false; go.disabled=false; dreamSlide.classList.remove('dreaming'); show(idx); }
+        if(onStone()){ msg.textContent=err.message||'Something went wrong — try again.'; msg.className='dream-msg err'; }
+      }finally{
+        dreaming=false; dreamingStoneId=null; go.disabled=false;
+        syncDreamingClass();
+        if(onStone()) show(idx);
+      }
     }
 
     // ---- 360 viewer (Three.js, lazy-loaded) ----
@@ -819,6 +866,12 @@
     // or the cross-origin cdn URL of a saved dream — R2 CORS now permits the
     // WebGL texture load either way.
     async function openPano(src, shareId){
+      // Tear down any viewer still alive from a previous open. Without this the
+      // old WebGL canvas stays orphaned in #pano and — since each new canvas is
+      // inserted *before* it — the stale one paints on top, so you'd see the
+      // previous 360 instead of the one you just loaded.
+      if(panoState){ panoState.destroy(); panoState=null; }
+      pano.querySelectorAll('canvas').forEach(c=>c.remove());
       panoShareId = shareId || null;
       const shareBtn=document.getElementById('panoShare');
       shareBtn.classList.toggle('show', !!panoShareId);

@@ -7,3 +7,8 @@ archive/
 
 pipeline/batch-state.json
 pipeline/batch.log
+
+# preserved on disk, not committed (also in Drive / regenerable)
+input/avanim/
+.wrangler/
+pipeline/qa-*.png

@@ -12,6 +12,7 @@ const IMAGE_MODEL = "gemini-3.1-flash-image";
 const API = "https://generativelanguage.googleapis.com/v1beta/models";
 
 const { r2put } = require("./_storage.js");
+const { loadConfig: loadBudget, computeUsage } = require("./_budget.js");
 
 // ---- rate limiter (per-instance only) ----
 const hits = new Map();
@@ -28,11 +29,11 @@ async function generatePano({ key, stoneB64, desc }) {
 
 The scene — the visitor's own home, as they describe it: ${desc}
 
-Critically: the exact stone from the attached photograph must appear in the scene as a treasured displayed object — on a pedestal, mantel, shelf or table. Preserve the stone's true colors, banding, texture and shape from the photo. Render it at a believable physical size for a collectible mineral specimen.
+Critically: the exact stone from the attached photograph must be the unmistakable focal point of the scene — proudly displayed on a pedestal, mantel, shelf or table. This is the whole point of the image: reproduce THIS stone faithfully, preserving its true colors, banding, veining, texture and exact shape from the photo. Render it clearly, sharply and in full detail — large enough that every band and marking on the stone is plainly visible. Do NOT replace it with a generic rock, a glowing orb, an abstract blob or an empty featureless shape; it must read as this specific, real polished mineral specimen.
 
-Distance and framing (strict): the stone must always sit at least several metres away from the viewer, across the room — on a far pedestal, mantel, shelf or against a distant wall — with clear, open floor space between the camera and the stone. There must ALWAYS be a visible gap of empty room between the viewer and the stone; it must never be near, never loom, never fill or crowd the foreground, never sit just in front of the camera. It should read as a SMALL, distant focal point — occupying only a modest portion of the view — that you would have to walk across the room to reach. Err on the side of placing it too far rather than too close.
+Distance and framing: set the stone well back across the room from the viewer — several steps away on a far pedestal, mantel, console or table, with a generous stretch of open, empty floor between the camera and the stone. There must be a clear sense of depth and distance: the viewer is standing back, looking across the room at the stone displayed on the far side. It must NOT be pressed up against the camera, must NOT loom in the foreground, and must NOT crowd the viewer — keep it set back with breathing room around it. At the same time, even at that distance it must stay the crisp, unmistakable focal point: render it in sharp, high-resolution detail so its banding, veining and shape read clearly — distant, but never a tiny indistinct dot, never a blur, never a featureless blob.
 
-Placement in the frame (important): position the stone at the exact HORIZONTAL CENTER of the equirectangular image (its middle column) and at the viewer's eye level (the vertical middle / horizon line). Someone entering the panorama looking straight ahead must see the stone centred dead-ahead in their view.
+Placement in the frame (important): position the stone at the exact HORIZONTAL CENTER of the equirectangular image (its middle column) and at the viewer's eye level (the vertical middle / horizon line). Someone entering the panorama looking straight ahead must see the stone centred dead-ahead, large and sharp, in their view.
 
 Style: photorealistic, warm inviting light, the home feels lived-in and personal. No people, no text, no watermarks. Equirectangular projection only — straight vertical lines may curve horizontally as the projection requires.`;
 
@@ -107,7 +108,7 @@ async function saveDream({ supabaseUrl, supabaseKey, stone, desc, ip, jpeg }) {
 const { stoneEmail, send: sendMail } = require("./_email.js");
 
 async function sendDreamEmail({ resendKey, to, name, desc, dreamId, imageUrl }) {
-  const viewUrl = dreamId ? `https://shaym.beauty/?dream=${dreamId}` : "https://shaym.beauty";
+  const viewUrl = dreamId ? `https://stones.art/?dream=${dreamId}` : "https://stones.art";
   return sendMail({
     resendKey,
     to,
@@ -201,6 +202,19 @@ module.exports = async (req, res) => {
   if (limited(ip)) {
     res.statusCode = 429;
     return res.json({ error: "The dream engine needs a breather — try again in a little while." });
+  }
+
+  // Budget gate — stop generating once the monthly allowance or the lifetime
+  // ceiling is reached. Fails open if usage can't be read (never breaks the
+  // public feature on an infra hiccup).
+  try {
+    const usage = await computeUsage(await loadBudget());
+    if (usage.blocked) {
+      res.statusCode = 429;
+      return res.json({ error: "The dream studio is resting — it's reached its budget for now. Please check back soon." });
+    }
+  } catch (e) {
+    console.error("budget check failed (allowing):", e.message);
   }
 
   const { stone = "flint", description = "" } = body;
