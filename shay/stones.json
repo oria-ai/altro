@@ -1137,8 +1137,8 @@
    "character": "",
    "status": "available",
    "dimensions": {
-    "height_cm": 22,
-    "approx": true
+    "height_cm": 55,
+    "approx": false
    },
    "top_offer_usd": null,
    "thumb": "https://cdn.shaym.beauty/stone-o3tt/blur-sm.jpg",
